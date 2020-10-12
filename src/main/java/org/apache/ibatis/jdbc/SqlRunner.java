@@ -34,6 +34,8 @@ import org.apache.ibatis.type.TypeHandlerRegistry;
 
 /**
  * @author Clinton Begin
+ *
+ *  对 JDBC 进行封装，结合SQL 工具类，能很好的通过Java 代码执行SQL语句，并检索SQL执行结果。
  */
 public class SqlRunner {
 
@@ -221,10 +223,14 @@ public class SqlRunner {
       List<Map<String, Object>> list = new ArrayList<>();
       List<String> columns = new ArrayList<>();
       List<TypeHandler<?>> typeHandlers = new ArrayList<>();
+
+      // 获取 ResultSetMetaData 对象，通过 ResultSetMetaData 对象获取所有列名。
       ResultSetMetaData rsmd = rs.getMetaData();
       for (int i = 0, n = rsmd.getColumnCount(); i < n; i++) {
         columns.add(rsmd.getColumnLabel(i + 1));
         try {
+
+          // 获取列的 JDBC 类型，根据类型获取 TypeHandler 对象。
           Class<?> type = Resources.classForName(rsmd.getColumnClassName(i + 1));
           TypeHandler<?> typeHandler = typeHandlerRegistry.getTypeHandler(type);
           if (typeHandler == null) {
@@ -235,10 +241,14 @@ public class SqlRunner {
           typeHandlers.add(typeHandlerRegistry.getTypeHandler(Object.class));
         }
       }
+
+      // 3 遍历 ResultSet 对象，将ResultSet 对象中的记录转换为 Map 对象。
       while (rs.next()) {
         Map<String, Object> row = new HashMap<>();
         for (int i = 0, n = columns.size(); i < n; i++) {
           String name = columns.get(i);
+
+          // 通过 typeHandler 对象的 getSesult() 方法将 JDBC 类型转换为 Java 类型。
           TypeHandler<?> handler = typeHandlers.get(i);
           row.put(name.toUpperCase(Locale.ENGLISH), handler.getResult(rs, name));
         }

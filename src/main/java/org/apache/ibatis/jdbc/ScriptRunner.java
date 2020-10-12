@@ -29,6 +29,8 @@ import java.util.regex.Pattern;
 
 /**
  * @author Clinton Begin
+ *
+ *  该类用于读取脚本文件中的SQL 语句并执行，使用起来比较简单。
  */
 public class ScriptRunner {
 
@@ -40,17 +42,26 @@ public class ScriptRunner {
 
   private final Connection connection;
 
+  // SQL 异常是否中断程序执行
   private boolean stopOnError;
+
+  // 是否抛出 SQLWarning 警告
   private boolean throwWarning;
+  // 是否自动提交
   private boolean autoCommit;
+  // 属性为true，批量执行文件中的SQL 语句，为false，是逐条执行SQL 语句。
   private boolean sendFullScript;
+  // 是否去除 Windows 系统换行符中的 \r
   private boolean removeCRs;
   private boolean escapeProcessing = true;
 
+  // 日志输出位置，默认标准输入输出，即控制台
   private PrintWriter logWriter = new PrintWriter(System.out);
   private PrintWriter errorLogWriter = new PrintWriter(System.err);
 
   private String delimiter = DEFAULT_DELIMITER;
+
+  // 是否支持 SQL 语句分隔符，单独占一行。
   private boolean fullLineDelimiter;
 
   public ScriptRunner(Connection connection) {
@@ -101,12 +112,18 @@ public class ScriptRunner {
   }
 
   public void runScript(Reader reader) {
+    // 设置事务是否自动提交
     setAutoCommit();
 
     try {
+      // 是否一次性批量执行脚本文件中的 SQL 语句
       if (sendFullScript) {
+        // 一次性执行脚本文件中的 SQL 语句
         executeFullScript(reader);
       } else {
+        /**
+         * 逐条执行脚本中的 SQL 语句。{@link #executeLineByLine(Reader)}
+         */
         executeLineByLine(reader);
       }
     } finally {
@@ -140,6 +157,10 @@ public class ScriptRunner {
       BufferedReader lineReader = new BufferedReader(reader);
       String line;
       while ((line = lineReader.readLine()) != null) {
+
+        /**
+         * 核心处理 {@link #handleLine(StringBuilder, String)}
+         */
         handleLine(command, line);
       }
       commitConnection();
@@ -197,16 +218,23 @@ public class ScriptRunner {
 
   private void handleLine(StringBuilder command, String line) throws SQLException {
     String trimmedLine = line.trim();
+    // 判断是否有 SQL 注解
     if (lineIsComment(trimmedLine)) {
       Matcher matcher = DELIMITER_PATTERN.matcher(trimmedLine);
       if (matcher.find()) {
         delimiter = matcher.group(5);
       }
+      // 打印注释内容
       println(trimmedLine);
+
+      // 判断是否存在分号
     } else if (commandReadyToExecute(trimmedLine)) {
+      // 则说明该行是一条完整的 SQL 的结尾。
       command.append(line.substring(0, line.lastIndexOf(delimiter)));
       command.append(LINE_SEPARATOR);
       println(command);
+
+      // 执行该条完整语句。
       executeStatement(command.toString());
       command.setLength(0);
     } else if (trimmedLine.length() > 0) {

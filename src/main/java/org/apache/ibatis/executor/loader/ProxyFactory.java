@@ -23,6 +23,8 @@ import org.apache.ibatis.session.Configuration;
 
 /**
  * @author Eduardo Macarron
+ *
+ *  代理工厂，主要用于创建动态代理对象，
  */
 public interface ProxyFactory {
 

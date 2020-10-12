@@ -28,6 +28,8 @@ import org.apache.ibatis.reflection.property.PropertyTokenizer;
 
 /**
  * @author Clinton Begin
+ *
+ *  反射工具类，用来获取类相关的信息。
  */
 public class MetaClass {
 

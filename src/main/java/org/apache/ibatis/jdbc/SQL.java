@@ -17,6 +17,8 @@ package org.apache.ibatis.jdbc;
 
 /**
  * @author Clinton Begin
+ *
+ *  SQL 工具类
  */
 public class SQL extends AbstractSQL<SQL> {
 

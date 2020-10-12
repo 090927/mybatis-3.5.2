@@ -25,6 +25,9 @@ import java.util.List;
  * @author Jeff Butler
  * @author Adam Gent
  * @author Kazuki Shimizu
+ *
+ *  维护 SQLStatement 内部类实例
+ *  构建 SQL 语句的方法。
  */
 public abstract class AbstractSQL<T> {
 
@@ -86,7 +89,11 @@ public abstract class AbstractSQL<T> {
   }
 
   public T SELECT(String columns) {
+
+    // 确定SQL 语句的类型。
     sql().statementType = SQLStatement.StatementType.SELECT;
+
+    // 添加 select 列
     sql().select.add(columns);
     return getSelf();
   }
@@ -424,6 +431,7 @@ public abstract class AbstractSQL<T> {
 
   private static class SQLStatement {
 
+    // SQL 语句的类型。
     public enum StatementType {
       DELETE, INSERT, SELECT, UPDATE
     }
@@ -462,8 +470,11 @@ public abstract class AbstractSQL<T> {
 
     }
 
+    // SQL 语句类型。
     StatementType statementType;
     List<String> sets = new ArrayList<>();
+
+    // 用于记录SQL 实例 SELECT \ UPDATE 等方法调用参数。
     List<String> select = new ArrayList<>();
     List<String> tables = new ArrayList<>();
     List<String> join = new ArrayList<>();
@@ -478,6 +489,8 @@ public abstract class AbstractSQL<T> {
     List<String> lastList = new ArrayList<>();
     List<String> columns = new ArrayList<>();
     List<List<String>> valuesList = new ArrayList<>();
+
+    // 是否包含 distinct 字段。
     boolean distinct;
     String offset;
     String limit;
@@ -488,24 +501,42 @@ public abstract class AbstractSQL<T> {
       valuesList.add(new ArrayList<>());
     }
 
+    /**
+     * SQL 语句拼接
+     * @param builder SQL 字符串构建对象
+     * @param keyword SQL 关键字
+     * @param parts SQL 关键字子句内容
+     * @param open SQL 关键字后开始字符
+     * @param close SQL 关键字后结束字符
+     * @param conjunction SQL 连接关键字，通常为 AND 或 OR
+     */
     private void sqlClause(SafeAppendable builder, String keyword, List<String> parts, String open, String close,
                            String conjunction) {
       if (!parts.isEmpty()) {
         if (!builder.isEmpty()) {
           builder.append("\n");
         }
+
+        // 拼接 SQL 关键字
         builder.append(keyword);
         builder.append(" ");
+        // 拼接关键字后开始字符
         builder.append(open);
         String last = "________";
         for (int i = 0, n = parts.size(); i < n; i++) {
           String part = parts.get(i);
+
+          // 如果 SQL 关键字对应的子集内容不为 OR 或 AND，则追加连接关键字
           if (i > 0 && !part.equals(AND) && !part.equals(OR) && !last.equals(AND) && !last.equals(OR)) {
             builder.append(conjunction);
           }
+
+          // 追加子关键字
           builder.append(part);
           last = part;
         }
+
+        // 追加关键字后，结束字符
         builder.append(close);
       }
     }
@@ -552,10 +583,10 @@ public abstract class AbstractSQL<T> {
     }
 
     private String updateSQL(SafeAppendable builder) {
-      sqlClause(builder, "UPDATE", tables, "", "", "");
+      sqlClause(builder, "UPDATE", tables, "", "", "");  // 追加 UPDATE 子句
       joins(builder);
-      sqlClause(builder, "SET", sets, "", "", ", ");
-      sqlClause(builder, "WHERE", where, "(", ")", " AND ");
+      sqlClause(builder, "SET", sets, "", "", ", ");  // 追加 SET 子句
+      sqlClause(builder, "WHERE", where, "(", ")", " AND "); // 追加 WHERE 子句
       limitingRowsStrategy.appendClause(builder, null, limit);
       return builder.toString();
     }
