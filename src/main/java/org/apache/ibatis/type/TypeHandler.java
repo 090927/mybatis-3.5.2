@@ -25,13 +25,16 @@ import java.sql.SQLException;
  */
 public interface TypeHandler<T> {
 
+  // 为 PreparedStatement 对象设置参数。
   void setParameter(PreparedStatement ps, int i, T parameter, JdbcType jdbcType) throws SQLException;
 
   /**
    * @param columnName Colunm name, when configuration <code>useColumnLabel</code> is <code>false</code>
    */
+  // 根据列名称获取该列的值
   T getResult(ResultSet rs, String columnName) throws SQLException;
 
+  // 根据索引列获取该列的值
   T getResult(ResultSet rs, int columnIndex) throws SQLException;
 
   T getResult(CallableStatement cs, int columnIndex) throws SQLException;

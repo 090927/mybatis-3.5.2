@@ -30,12 +30,33 @@ import org.apache.ibatis.session.ResultHandler;
  */
 public interface StatementHandler {
 
+  /**
+   * 用于创建 jdbc Statement 对象，并完成 Statement 对象的属性设置。
+   * @param connection
+   * @param transactionTimeout
+   * @return
+   * @throws SQLException
+   */
   Statement prepare(Connection connection, Integer transactionTimeout)
       throws SQLException;
 
+
+  /**
+   *
+   *  使用 MyBatis 中的 ParameterHandler 组件为 PreparedStatement 和 CallableStatement 参数占位符设置值
+   *
+   * @param statement
+   * @throws SQLException
+   */
   void parameterize(Statement statement)
       throws SQLException;
 
+  /**
+   *  将 SQL 命令添加到批处理量执行列表中。
+   *
+   * @param statement
+   * @throws SQLException
+   */
   void batch(Statement statement)
       throws SQLException;
 
@@ -45,9 +66,24 @@ public interface StatementHandler {
   <E> List<E> query(Statement statement, ResultHandler resultHandler)
       throws SQLException;
 
+  /**
+   *
+   * 带游标的查询，返回 Cursor 对象，能够从 Iterator 动态从数据库中加载数据。
+   *
+   * @param statement
+   * @param <E>
+   * @return
+   * @throws SQLException
+   */
   <E> Cursor<E> queryCursor(Statement statement)
       throws SQLException;
 
+  /**
+   *
+   *  获取 Mapper 中配置的 SQL 信息，
+   *
+   * @return
+   */
   BoundSql getBoundSql();
 
   ParameterHandler getParameterHandler();

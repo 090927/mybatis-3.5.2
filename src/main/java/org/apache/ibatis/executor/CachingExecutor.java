@@ -35,6 +35,9 @@ import org.apache.ibatis.transaction.Transaction;
 /**
  * @author Clinton Begin
  * @author Eduardo Macarron
+ *
+ *  当开启 二级缓存，CachingExecutor 对 SimpleExecutor、ReuseExecutor、BatchExecutor 进行装饰操作。
+ *    为查询增加缓存功能。
  */
 public class CachingExecutor implements Executor {
 

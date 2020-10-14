@@ -35,6 +35,9 @@ import org.apache.ibatis.transaction.Transaction;
 
 /**
  * @author Clinton Begin
+ *
+ *  对 Executor 进行缓存操作，当遇到相同的SQL，之间从缓存中提取 `executor` 对象进行复用。
+ *    避免频繁的创建和销毁 Executor 对象。
  */
 public class ReuseExecutor extends BaseExecutor {
 

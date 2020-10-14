@@ -97,6 +97,9 @@ import org.apache.ibatis.type.TypeHandlerRegistry;
 
 /**
  * @author Clinton Begin
+ *
+ *
+ *  MyBatiis 配置信息。
  */
 public class Configuration {
 
@@ -144,10 +147,19 @@ public class Configuration {
    */
   protected Class<?> configurationFactory;
 
+  // 用于注册 Mapper 接口信息，建立 Mapper 接口的 Class对象和 MapperProxyFactory 对象之间的关系。
   protected final MapperRegistry mapperRegistry = new MapperRegistry(this);
+
+  // 用于注册 MyBaties 插件信息，插件实际上就是一个拦截器。
   protected final InterceptorChain interceptorChain = new InterceptorChain();
+
+  // 用于注册所有 TypeHandler 并建立 jdbc 类型与Type 之间的对应关系。
   protected final TypeHandlerRegistry typeHandlerRegistry = new TypeHandlerRegistry();
+
+  // 用于注册所有的类型别名
   protected final TypeAliasRegistry typeAliasRegistry = new TypeAliasRegistry();
+
+  // 用于注册 LanguageDriver， 用于解析SQL 配置，将配置信息转换成 sqlSource 对象。
   protected final LanguageDriverRegistry languageRegistry = new LanguageDriverRegistry();
 
   protected final Map<String, MappedStatement> mappedStatements = new StrictMap<MappedStatement>("Mapped Statements collection")

@@ -37,6 +37,8 @@ import org.apache.ibatis.transaction.Transaction;
 
 /**
  * @author Jeff Butler
+ *
+ *  同一个 Mapper 执行 update、insert、delete，调用 Statement 批量操作功能。
  */
 public class BatchExecutor extends BaseExecutor {
 

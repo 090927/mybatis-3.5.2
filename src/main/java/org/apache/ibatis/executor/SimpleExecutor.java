@@ -33,6 +33,8 @@ import org.apache.ibatis.transaction.Transaction;
 
 /**
  * @author Clinton Begin
+ *
+ *  可以完成基本的增删改查操作。
  */
 public class SimpleExecutor extends BaseExecutor {
 
