@@ -51,10 +51,14 @@ public class ParamNameResolver {
 
   public ParamNameResolver(Configuration config, Method method) {
     final Class<?>[] paramTypes = method.getParameterTypes();
+
+    // 获取所有参数注解。
     final Annotation[][] paramAnnotations = method.getParameterAnnotations();
     final SortedMap<Integer, String> map = new TreeMap<>();
     int paramCount = paramAnnotations.length;
     // get names from @Param annotations
+
+    // 从 @Param 注解中获取参数名称。
     for (int paramIndex = 0; paramIndex < paramCount; paramIndex++) {
       if (isSpecialParameter(paramTypes[paramIndex])) {
         // skip special parameters
@@ -62,14 +66,20 @@ public class ParamNameResolver {
       }
       String name = null;
       for (Annotation annotation : paramAnnotations[paramIndex]) {
+
+        // 参数中是否有 `@Param` 注解
         if (annotation instanceof Param) {
           hasParamAnnotation = true;
+
+          // 提取参数名称
           name = ((Param) annotation).value();
           break;
         }
       }
       if (name == null) {
         // @Param was not specified.
+
+        // 未指定 `@Param` 注解，用于判断是否使用实际参数名称。
         if (config.isUseActualParamName()) {
           name = getActualParamName(method, paramIndex);
         }
@@ -79,8 +89,12 @@ public class ParamNameResolver {
           name = String.valueOf(map.size());
         }
       }
+
+      // 将参数放入 Map中，key: 参数索引位置，value：参数名称
       map.put(paramIndex, name);
     }
+
+    // 将参数信息，保存在 names 属性中。
     names = Collections.unmodifiableSortedMap(map);
   }
 

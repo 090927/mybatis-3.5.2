@@ -162,6 +162,7 @@ public class Configuration {
   // 用于注册 LanguageDriver， 用于解析SQL 配置，将配置信息转换成 sqlSource 对象。
   protected final LanguageDriverRegistry languageRegistry = new LanguageDriverRegistry();
 
+  // 用于注册 MapperStatement。Key 为配置 Mapper SQL 配置的id.
   protected final Map<String, MappedStatement> mappedStatements = new StrictMap<MappedStatement>("Mapped Statements collection")
       .conflictMessageProducer((savedValue, targetValue) ->
           ". please check " + savedValue.getResource() + " and " + targetValue.getResource());
@@ -710,6 +711,10 @@ public class Configuration {
     return parameterMaps.containsKey(id);
   }
 
+  /**
+   * 用于将 MappedStatement 对象添加到 `mappedStatements` 属性中。
+   * @param ms
+   */
   public void addMappedStatement(MappedStatement ms) {
     mappedStatements.put(ms.getId(), ms);
   }
@@ -784,10 +789,18 @@ public class Configuration {
   }
 
   public <T> void addMapper(Class<T> type) {
+
+    /**
+     * 注册 {@link MapperRegistry#addMapper(Class)}
+     */
     mapperRegistry.addMapper(type);
   }
 
   public <T> T getMapper(Class<T> type, SqlSession sqlSession) {
+
+    /**
+     * {@link MapperRegistry#getMapper(Class, SqlSession)}
+     */
     return mapperRegistry.getMapper(type, sqlSession);
   }
 

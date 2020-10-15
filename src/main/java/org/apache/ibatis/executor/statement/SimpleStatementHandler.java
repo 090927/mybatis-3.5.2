@@ -71,7 +71,16 @@ public class SimpleStatementHandler extends BaseStatementHandler {
   @Override
   public <E> List<E> query(Statement statement, ResultHandler resultHandler) throws SQLException {
     String sql = boundSql.getSql();
+
+    /**
+     * 调用
+     */
     statement.execute(sql);
+
+    /**
+     * 将结果集转换为 Java 实体对象，并将实体对象放入 `multipleResults`
+     * {@link org.apache.ibatis.executor.resultset.DefaultResultSetHandler#handleResultSets(Statement)}
+     */
     return resultSetHandler.handleResultSets(statement);
   }
 

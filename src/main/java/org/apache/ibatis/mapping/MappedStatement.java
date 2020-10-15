@@ -30,6 +30,9 @@ import org.apache.ibatis.session.Configuration;
 
 /**
  * @author Clinton Begin
+ *
+ *  描述 Mapper SQL 配置信息。
+ *   SQL 有两种方式，1: XML 2: 注解。
  */
 public final class MappedStatement {
 

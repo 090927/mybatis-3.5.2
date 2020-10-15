@@ -219,6 +219,9 @@ public class DefaultResultSetHandler implements ResultSetHandler {
       }
     }
 
+    /**
+     * 对 multipleResult 进行处理，如果只有一个结果集，则返回结果集中的元素。否则返回多个结果集。
+     */
     return collapseSingleResultList(multipleResults);
   }
 

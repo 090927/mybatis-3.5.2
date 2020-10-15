@@ -60,8 +60,19 @@ public class SimpleExecutor extends BaseExecutor {
     Statement stmt = null;
     try {
       Configuration configuration = ms.getConfiguration();
+
+      // 获取 StatementHandler 对象。
       StatementHandler handler = configuration.newStatementHandler(wrapper, ms, parameter, rowBounds, resultHandler, boundSql);
+
+      /**
+       * 创建 Statement 对象 {@link #prepareStatement(StatementHandler, Log)}
+       */
       stmt = prepareStatement(handler, ms.getStatementLog());
+
+      /**
+       * 调用 StatementHandler 对象 query
+       *  {@link org.apache.ibatis.executor.statement.SimpleStatementHandler#query(Statement, ResultHandler)}
+       */
       return handler.query(stmt, resultHandler);
     } finally {
       closeStatement(stmt);
@@ -84,8 +95,20 @@ public class SimpleExecutor extends BaseExecutor {
 
   private Statement prepareStatement(StatementHandler handler, Log statementLog) throws SQLException {
     Statement stmt;
+
+    // 获取 JDBC Connection 对象。
     Connection connection = getConnection(statementLog);
+
+    /**
+     * 调用 StatementHandler prepare 创建 Statement 对象。
+     *  {@link org.apache.ibatis.executor.statement.BaseStatementHandler#prepare(Connection, Integer)}
+     */
     stmt = handler.prepare(connection, transaction.getTimeout());
+
+    /**
+     * 调用 StatementHandler parameterize 设置参数
+     *  {@link org.apache.ibatis.executor.statement.BaseStatementHandler#parameterize(Statement)}
+      */
     handler.parameterize(stmt);
     return stmt;
   }

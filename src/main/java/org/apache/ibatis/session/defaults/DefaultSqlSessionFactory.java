@@ -44,6 +44,10 @@ public class DefaultSqlSessionFactory implements SqlSessionFactory {
 
   @Override
   public SqlSession openSession() {
+
+    /**
+     * 核心实现 {@link #openSessionFromDataSource(ExecutorType, TransactionIsolationLevel, boolean)}
+     */
     return openSessionFromDataSource(configuration.getDefaultExecutorType(), null, false);
   }
 
@@ -90,10 +94,19 @@ public class DefaultSqlSessionFactory implements SqlSessionFactory {
   private SqlSession openSessionFromDataSource(ExecutorType execType, TransactionIsolationLevel level, boolean autoCommit) {
     Transaction tx = null;
     try {
+      // 获取 MyBatis 主配置文件配置的环境信息
       final Environment environment = configuration.getEnvironment();
+
+      // 创建事务管理器工厂
       final TransactionFactory transactionFactory = getTransactionFactoryFromEnvironment(environment);
+
+      // 创建事务管理器
       tx = transactionFactory.newTransaction(environment.getDataSource(), level, autoCommit);
+
+      // 根据 MyBatis 主配置文件中指定 Executor 类型创建对应 Executor 实例。
       final Executor executor = configuration.newExecutor(tx, execType);
+
+      // 创建 DefaultSqlSession 实例。
       return new DefaultSqlSession(configuration, executor, autoCommit);
     } catch (Exception e) {
       closeTransaction(tx); // may have fetched a connection so lets call close()

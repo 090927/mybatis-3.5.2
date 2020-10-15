@@ -131,8 +131,14 @@ public abstract class BaseExecutor implements Executor {
 
   @Override
   public <E> List<E> query(MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler resultHandler) throws SQLException {
+
+    // 获取 BoundSql 对象，BoundSql 为动态 SQL 解析生成的SQL 语句和参数映射信息封装。
     BoundSql boundSql = ms.getBoundSql(parameter);
+
+    // 创建，缓存 key .
     CacheKey key = createCacheKey(ms, parameter, rowBounds, boundSql);
+
+    // 【 query 】
     return query(ms, parameter, rowBounds, resultHandler, key, boundSql);
   }
 
@@ -149,10 +155,16 @@ public abstract class BaseExecutor implements Executor {
     List<E> list;
     try {
       queryStack++;
+
+      // 从缓存中获取结果。
       list = resultHandler == null ? (List<E>) localCache.getObject(key) : null;
       if (list != null) {
         handleLocallyCachedOutputParameters(ms, key, parameter, boundSql);
       } else {
+
+        /**
+         * 若缓存中不存在，则 调用 {@link #queryFromDatabase(MappedStatement, Object, RowBounds, ResultHandler, CacheKey, BoundSql)} 查询数据库。
+         */
         list = queryFromDatabase(ms, parameter, rowBounds, resultHandler, key, boundSql);
       }
     } finally {
@@ -321,10 +333,17 @@ public abstract class BaseExecutor implements Executor {
     List<E> list;
     localCache.putObject(key, EXECUTION_PLACEHOLDER);
     try {
+
+      /**
+       * 核心查询方法，子类实现
+       *  {@link SimpleExecutor#doQuery(MappedStatement, Object, RowBounds, ResultHandler, BoundSql)}
+       */
       list = doQuery(ms, parameter, rowBounds, resultHandler, boundSql);
     } finally {
       localCache.removeObject(key);
     }
+
+    // 缓存查询结果。
     localCache.putObject(key, list);
     if (ms.getStatementType() == StatementType.CALLABLE) {
       localOutputParameterCache.putObject(key, parameter);

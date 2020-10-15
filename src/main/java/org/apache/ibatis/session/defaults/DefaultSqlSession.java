@@ -143,7 +143,13 @@ public class DefaultSqlSession implements SqlSession {
   @Override
   public <E> List<E> selectList(String statement, Object parameter, RowBounds rowBounds) {
     try {
+
+      // 根据 MapperId 获取 `MappedStatement` 信息。
       MappedStatement ms = configuration.getMappedStatement(statement);
+
+      /**
+       * 以 `MappedStatement` 为参数，调用 {@link org.apache.ibatis.executor.BaseExecutor#query(MappedStatement, Object, RowBounds, ResultHandler)}
+       */
       return executor.query(ms, wrapCollection(parameter), rowBounds, Executor.NO_RESULT_HANDLER);
     } catch (Exception e) {
       throw ExceptionFactory.wrapException("Error querying database.  Cause: " + e, e);
@@ -286,8 +292,18 @@ public class DefaultSqlSession implements SqlSession {
     return configuration;
   }
 
+  /**
+   * 返回一个动态代理对象
+   * @param type Mapper interface class
+   * @param <T>
+   * @return
+   */
   @Override
   public <T> T getMapper(Class<T> type) {
+
+    /**
+     * {@link Configuration#getMapper(Class, SqlSession)}
+     */
     return configuration.getMapper(type, this);
   }
 

@@ -91,14 +91,22 @@ public class XMLConfigBuilder extends BaseBuilder {
   }
 
   public Configuration parse() {
+
+    // 防止一个实例多次调用
     if (parsed) {
       throw new BuilderException("Each XMLConfigBuilder can only be used once.");
     }
     parsed = true;
+
+    // 对 XNode 进行处理。
     parseConfiguration(parser.evalNode("/configuration"));
     return configuration;
   }
 
+  /**
+   * 对 <configuration> 子标签进行处理。
+   * @param root
+   */
   private void parseConfiguration(XNode root) {
     try {
       //issue #117 read properties first
@@ -116,6 +124,10 @@ public class XMLConfigBuilder extends BaseBuilder {
       environmentsElement(root.evalNode("environments"));
       databaseIdProviderElement(root.evalNode("databaseIdProvider"));
       typeHandlerElement(root.evalNode("typeHandlers"));
+
+      /**
+       *  <mappers/> 标签解析过程 {@link #mapperElement(XNode)}
+       */
       mapperElement(root.evalNode("mappers"));
     } catch (Exception e) {
       throw new BuilderException("Error parsing SQL Mapper Configuration. Cause: " + e, e);
@@ -357,9 +369,16 @@ public class XMLConfigBuilder extends BaseBuilder {
     }
   }
 
+  /**
+   * <Mappers/> 标签解析过程
+   * @param parent
+   * @throws Exception
+   */
   private void mapperElement(XNode parent) throws Exception {
     if (parent != null) {
       for (XNode child : parent.getChildren()) {
+
+        // 通过 package 标签指定包。
         if ("package".equals(child.getName())) {
           String mapperPackage = child.getStringAttribute("name");
           configuration.addMappers(mapperPackage);
@@ -367,10 +386,18 @@ public class XMLConfigBuilder extends BaseBuilder {
           String resource = child.getStringAttribute("resource");
           String url = child.getStringAttribute("url");
           String mapperClass = child.getStringAttribute("class");
+
+          // 通过 resource 属性指定 XML 文件路径。
           if (resource != null && url == null && mapperClass == null) {
+
+            // 通过URL 属性指定 XML 文件路径。
             ErrorContext.instance().resource(resource);
             InputStream inputStream = Resources.getResourceAsStream(resource);
             XMLMapperBuilder mapperParser = new XMLMapperBuilder(inputStream, configuration, resource, configuration.getSqlFragments());
+
+            /**
+             * {@link XMLMapperBuilder#parse()}
+             */
             mapperParser.parse();
           } else if (resource == null && url != null && mapperClass == null) {
             ErrorContext.instance().resource(url);
@@ -378,6 +405,8 @@ public class XMLConfigBuilder extends BaseBuilder {
             XMLMapperBuilder mapperParser = new XMLMapperBuilder(inputStream, configuration, url, configuration.getSqlFragments());
             mapperParser.parse();
           } else if (resource == null && url == null && mapperClass != null) {
+
+            // 通过 class 属性指定接口的完全限定名
             Class<?> mapperInterface = Resources.classForName(mapperClass);
             configuration.addMapper(mapperInterface);
           } else {

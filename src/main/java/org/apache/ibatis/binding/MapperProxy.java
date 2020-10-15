@@ -23,6 +23,7 @@ import java.lang.reflect.Method;
 import java.util.Map;
 
 import org.apache.ibatis.reflection.ExceptionUtil;
+import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.SqlSession;
 
 /**
@@ -45,6 +46,8 @@ public class MapperProxy<T> implements InvocationHandler, Serializable {
   @Override
   public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
     try {
+
+      // 从Object 类继承的方法不处理
       if (Object.class.equals(method.getDeclaringClass())) {
         return method.invoke(this, args);
       } else if (method.isDefault()) {
@@ -53,10 +56,25 @@ public class MapperProxy<T> implements InvocationHandler, Serializable {
     } catch (Throwable t) {
       throw ExceptionUtil.unwrapThrowable(t);
     }
+
+    /**
+     * 对 Mapper 接口中定义的方法进行封装，生成 MapperMethod 对象。{@link #cachedMapperMethod(Method)}
+     */
     final MapperMethod mapperMethod = cachedMapperMethod(method);
+
+    /**
+     * 方法执行 {@link MapperMethod#execute(SqlSession, Object[])}
+     */
     return mapperMethod.execute(sqlSession, args);
   }
 
+  /**
+   *  首先从缓存中获取，如果获取不到，则创建 MapperMethod 对象。然后添加到缓存中。（这就是享元思路）
+   * @param method
+   * @return
+   *
+   *  {@link MapperMethod#MapperMethod(Class, Method, Configuration)}
+   */
   private MapperMethod cachedMapperMethod(Method method) {
     return methodCache.computeIfAbsent(method, k -> new MapperMethod(mapperInterface, method, sqlSession.getConfiguration()));
   }

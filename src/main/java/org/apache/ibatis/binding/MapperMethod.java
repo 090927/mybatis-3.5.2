@@ -43,6 +43,9 @@ import org.apache.ibatis.session.SqlSession;
  * @author Eduardo Macarron
  * @author Lasse Voss
  * @author Kazuki Shimizu
+ *
+ *
+ *  对 Mapper 方法的封装。
  */
 public class MapperMethod {
 
@@ -50,15 +53,31 @@ public class MapperMethod {
   private final MethodSignature method;
 
   public MapperMethod(Class<?> mapperInterface, Method method, Configuration config) {
+
+    /**
+     *  获取SQL 语句的类型和 Mapper的 ID 等信息 {@link SqlCommand#SqlCommand(Configuration, Class, Method)}
+     *  获取方法的签名信息。 {@link MethodSignature#MethodSignature(Configuration, Class, Method)}
+     *    1、例如 Mapper 方法的参数名、参数注解。
+     */
     this.command = new SqlCommand(config, mapperInterface, method);
     this.method = new MethodSignature(config, mapperInterface, method);
   }
 
   public Object execute(SqlSession sqlSession, Object[] args) {
     Object result;
+
+    // 获取 SQL 类型
     switch (command.getType()) {
       case INSERT: {
+
+        // 提取参数信息。
         Object param = method.convertArgsToSqlCommandParam(args);
+
+        /**
+         * 调用 SQLSession的 insert 方法，调用 `rowCountResult` 方法统计行数。
+         *  {@link org.apache.ibatis.session.defaults.DefaultSqlSession#insert(String)}
+         *  {@link #rowCountResult(int)}
+         */
         result = rowCountResult(sqlSession.insert(command.getName(), param));
         break;
       }
@@ -216,13 +235,21 @@ public class MapperMethod {
 
   }
 
+  /**
+   * 获取SQL 语句的类型和 Mapper的 ID 等信息
+   */
   public static class SqlCommand {
 
+    // MapperId
     private final String name;
+
+    // SQL 类型
     private final SqlCommandType type;
 
     public SqlCommand(Configuration configuration, Class<?> mapperInterface, Method method) {
       final String methodName = method.getName();
+
+      // 获取声明该方法的类或接口的 Class对象。
       final Class<?> declaringClass = method.getDeclaringClass();
       MappedStatement ms = resolveMappedStatement(mapperInterface, methodName, declaringClass,
           configuration);
@@ -251,14 +278,28 @@ public class MapperMethod {
       return type;
     }
 
+    /**
+     * 根据接口的 全限类名和方法名。获取对应的 MappedStatement 对象。
+     * @param mapperInterface
+     * @param methodName
+     * @param declaringClass
+     * @param configuration
+     * @return
+     */
     private MappedStatement resolveMappedStatement(Class<?> mapperInterface, String methodName,
         Class<?> declaringClass, Configuration configuration) {
+
+      // mapperId
       String statementId = mapperInterface.getName() + "." + methodName;
       if (configuration.hasStatement(statementId)) {
+
+        // 如果 Configuration 对象已注册 MappedStatement 对象，则获取 `MappedStatement` 对象。
         return configuration.getMappedStatement(statementId);
       } else if (mapperInterface.equals(declaringClass)) {
         return null;
       }
+
+      // 如果 方法是在 Mapper 父接口中定义，则从父接口中获取 `MappedStatement` 对象。
       for (Class<?> superInterface : mapperInterface.getInterfaces()) {
         if (declaringClass.isAssignableFrom(superInterface)) {
           MappedStatement ms = resolveMappedStatement(superInterface, methodName,
@@ -272,6 +313,10 @@ public class MapperMethod {
     }
   }
 
+
+  /**
+   * 获取方法的签名信息
+   */
   public static class MethodSignature {
 
     private final boolean returnsMany;
@@ -286,6 +331,8 @@ public class MapperMethod {
     private final ParamNameResolver paramNameResolver;
 
     public MethodSignature(Configuration configuration, Class<?> mapperInterface, Method method) {
+
+      // 获取方法返回值。
       Type resolvedReturnType = TypeParameterResolver.resolveReturnType(method, mapperInterface);
       if (resolvedReturnType instanceof Class<?>) {
         this.returnType = (Class<?>) resolvedReturnType;
@@ -294,14 +341,28 @@ public class MapperMethod {
       } else {
         this.returnType = method.getReturnType();
       }
+
+      // 返回是 void 类型
       this.returnsVoid = void.class.equals(this.returnType);
+
+      // 返回是 集合类型。
       this.returnsMany = configuration.getObjectFactory().isCollection(this.returnType) || this.returnType.isArray();
+
+      // 返回 cursor 类型
       this.returnsCursor = Cursor.class.equals(this.returnType);
+
+      // 返回 Optional 类型
       this.returnsOptional = Optional.class.equals(this.returnType);
       this.mapKey = getMapKey(method);
       this.returnsMap = this.mapKey != null;
+
+      // rowBoundIndex 位置索引
       this.rowBoundsIndex = getUniqueParamIndex(method, RowBounds.class);
       this.resultHandlerIndex = getUniqueParamIndex(method, ResultHandler.class);
+
+      /**
+       * 解析 Mapper 方法参数。{@link ParamNameResolver#ParamNameResolver(Configuration, Method)}
+       */
       this.paramNameResolver = new ParamNameResolver(configuration, method);
     }
 
