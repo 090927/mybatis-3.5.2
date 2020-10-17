@@ -40,8 +40,18 @@ public class SqlSourceBuilder extends BaseBuilder {
   }
 
   public SqlSource parse(String originalSql, Class<?> parameterType, Map<String, Object> additionalParameters) {
+
+    /**
+     * ParameterMappingTokenHandler 为 MyBatis 参数映射处理器，用于处理 SQL 中 #{} 参数占位符。
+     */
     ParameterMappingTokenHandler handler = new ParameterMappingTokenHandler(configuration, parameterType, additionalParameters);
+
+    // 解析 #{} 参数
     GenericTokenParser parser = new GenericTokenParser("#{", "}", handler);
+
+    /**
+     *  解析#{} 参数占位符的过程。 {@link GenericTokenParser#parse(String)}
+     */
     String sql = parser.parse(originalSql);
     return new StaticSqlSource(configuration, sql, handler.getParameterMappings());
   }
@@ -68,19 +78,38 @@ public class SqlSourceBuilder extends BaseBuilder {
       return "?";
     }
 
+    /**
+     * 解析 参数占位符生成 `ParameterMapping` 对象。
+     * @param content
+     * @return
+     */
     private ParameterMapping buildParameterMapping(String content) {
+
+      // 将 占位符内容转换为 map 对象。
       Map<String, String> propertiesMap = parseParameterMapping(content);
+
+      // 对应的值为参数占位符名称。
       String property = propertiesMap.get("property");
       Class<?> propertyType;
+
+      // 如果内置参数 <bind> 标签，绑定参数包含该属性。
       if (metaParameters.hasGetter(property)) { // issue #448 get type from additional params
         propertyType = metaParameters.getGetterType(property);
+
+        // 该参数是否注册 TypeHandler 如果注册，则使用参数类型
       } else if (typeHandlerRegistry.hasTypeHandler(parameterType)) {
         propertyType = parameterType;
+
+        // 如果指定 jdbcType 属性，并且为 CURSOR 类型。
       } else if (JdbcType.CURSOR.name().equals(propertiesMap.get("jdbcType"))) {
         propertyType = java.sql.ResultSet.class;
+
+        // 参数类型是 Map 接口的子类型。
       } else if (property == null || Map.class.isAssignableFrom(parameterType)) {
         propertyType = Object.class;
       } else {
+
+        // 获取 `parameterType` 对应 MetaClass 对象。方便获取参数类型的反射信息。
         MetaClass metaClass = MetaClass.forClass(parameterType, configuration.getReflectorFactory());
         if (metaClass.hasGetter(property)) {
           propertyType = metaClass.getGetterType(property);
@@ -88,12 +117,16 @@ public class SqlSourceBuilder extends BaseBuilder {
           propertyType = Object.class;
         }
       }
+
+      // 使用构造者模式，构建 `ParameterMapping` 对象。
       ParameterMapping.Builder builder = new ParameterMapping.Builder(configuration, property, propertyType);
       Class<?> javaType = propertyType;
       String typeHandlerAlias = null;
       for (Map.Entry<String, String> entry : propertiesMap.entrySet()) {
         String name = entry.getKey();
         String value = entry.getValue();
+
+        // 指定 ParameterMapping 对象的属性。
         if ("javaType".equals(name)) {
           javaType = resolveClass(value);
           builder.javaType(javaType);

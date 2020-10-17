@@ -43,12 +43,16 @@ public interface Cache {
 
   /**
    * @return The identifier of this cache
+   *
+   *  获取缓存ID，通常情况是 Mapper 的命名空间名称。
    */
   String getId();
 
   /**
    * @param key Can be any object but usually it is a {@link CacheKey}
    * @param value The result of a select.
+   *
+   *   添加缓存。
    */
   void putObject(Object key, Object value);
 

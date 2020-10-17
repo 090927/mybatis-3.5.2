@@ -19,5 +19,11 @@ package org.apache.ibatis.scripting.xmltags;
  * @author Clinton Begin
  */
 public interface SqlNode {
+
+  /**
+   * 用于解析 SQL 节点，根据参数信息生成静态SQL 内容
+   * @param context
+   * @return
+   */
   boolean apply(DynamicContext context);
 }

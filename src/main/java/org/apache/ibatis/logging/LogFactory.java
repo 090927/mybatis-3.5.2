@@ -30,6 +30,9 @@ public final class LogFactory {
 
   private static Constructor<? extends Log> logConstructor;
 
+  /**
+   * 未指定日志框架，系统查找日志框架顺序。
+   */
   static {
     tryImplementation(LogFactory::useSlf4jLogging);
     tryImplementation(LogFactory::useCommonsLogging);
@@ -55,6 +58,7 @@ public final class LogFactory {
     }
   }
 
+  // 自定义日志实现
   public static synchronized void useCustomLogging(Class<? extends Log> clazz) {
     setImplementation(clazz);
   }
@@ -83,10 +87,15 @@ public final class LogFactory {
     setImplementation(org.apache.ibatis.logging.stdout.StdOutImpl.class);
   }
 
+  // 不输出日志。
   public static synchronized void useNoLogging() {
     setImplementation(org.apache.ibatis.logging.nologging.NoLoggingImpl.class);
   }
 
+  /**
+   * 启用多个线程，查找，`相关日志框架jar` 包是否存在。
+   * @param runnable
+   */
   private static void tryImplementation(Runnable runnable) {
     if (logConstructor == null) {
       try {
@@ -99,7 +108,11 @@ public final class LogFactory {
 
   private static void setImplementation(Class<? extends Log> implClass) {
     try {
+
+      // 获取日志的实现类
       Constructor<? extends Log> candidate = implClass.getConstructor(String.class);
+
+      // 根据日志实现类，创建 log 实例。
       Log log = candidate.newInstance(LogFactory.class.getName());
       if (log.isDebugEnabled()) {
         log.debug("Logging initialized using '" + implClass + "' adapter.");

@@ -51,6 +51,9 @@ public class XMLScriptBuilder extends BaseBuilder {
   }
 
 
+  /**
+   * 初始化，动态标签，解析Handler.
+   */
   private void initNodeHandlerMap() {
     nodeHandlerMap.put("trim", new TrimHandler());
     nodeHandlerMap.put("where", new WhereHandler());
@@ -63,9 +66,19 @@ public class XMLScriptBuilder extends BaseBuilder {
     nodeHandlerMap.put("bind", new BindHandler());
   }
 
+  /**
+   * 将 SQL 资源，转换为 SqlSource 对象。
+   * @return
+   */
   public SqlSource parseScriptNode() {
+
+    /**
+     * 将 SQL 配置，转换为 sqlNode 对象 {@link #parseDynamicTags(XNode)}
+     */
     MixedSqlNode rootSqlNode = parseDynamicTags(context);
     SqlSource sqlSource;
+
+    // 判断 Mapper SQL 配置是否包含动态SQL 元素，如果是，就创建 `DynamicSqlSource` 对象。
     if (isDynamic) {
       sqlSource = new DynamicSqlSource(configuration, rootSqlNode);
     } else {
@@ -74,22 +87,43 @@ public class XMLScriptBuilder extends BaseBuilder {
     return sqlSource;
   }
 
+
+  /**
+   * 将 SQL 配置，转换为 sqlNode 对象
+   * @param node
+   * @return
+   */
   protected MixedSqlNode parseDynamicTags(XNode node) {
     List<SqlNode> contents = new ArrayList<>();
     NodeList children = node.getNode().getChildNodes();
+
+    // 对 XML 子元素进行遍历。
     for (int i = 0; i < children.getLength(); i++) {
       XNode child = node.newXNode(children.item(i));
+
+      // 如果子元素为 SQL 文本内容，则使用 textSqlNode 描述该节点。
       if (child.getNode().getNodeType() == Node.CDATA_SECTION_NODE || child.getNode().getNodeType() == Node.TEXT_NODE) {
         String data = child.getStringBody("");
         TextSqlNode textSqlNode = new TextSqlNode(data);
+
+        // 若 SQL 文本中包含 ${} 参数占位符，则为动态SQL。
         if (textSqlNode.isDynamic()) {
           contents.add(textSqlNode);
           isDynamic = true;
         } else {
+
+          // 如果 SQL 文本中，不包含 ${} 参数占位符，则不是 动态SQL。
           contents.add(new StaticTextSqlNode(data));
         }
       } else if (child.getNode().getNodeType() == Node.ELEMENT_NODE) { // issue #628
+
+        // 如果子元素 <if> <where> 等标签，则使用对应的 NodeHandler 处理。
         String nodeName = child.getNode().getNodeName();
+
+        /**
+         * NodeHandler 接口提供9个实现类。每个实现类用于处理对应的 动态SQL 标签。
+         *  在 `XmlScriptBuilder` 构造方法中，进行初始化 {@link #initNodeHandlerMap)
+         */
         NodeHandler handler = nodeHandlerMap.get(nodeName);
         if (handler == null) {
           throw new BuilderException("Unknown element <" + nodeName + "> in SQL statement.");
@@ -188,9 +222,19 @@ public class XMLScriptBuilder extends BaseBuilder {
 
     @Override
     public void handleNode(XNode nodeToHandle, List<SqlNode> targetContents) {
+
+      /**
+       * 解析 <if></if> 标签中的子节点 {@link #parseDynamicTags(XNode)}
+       */
       MixedSqlNode mixedSqlNode = parseDynamicTags(nodeToHandle);
+
+      // 获取 <if> 标签中 test 属性。
       String test = nodeToHandle.getStringAttribute("test");
+
+      // 创建 IfSqlNode 对象。
       IfSqlNode ifSqlNode = new IfSqlNode(mixedSqlNode, test);
+
+      // 将 IfSqlNode 对象，添加到 List 中。
       targetContents.add(ifSqlNode);
     }
   }

@@ -17,6 +17,8 @@ package org.apache.ibatis.scripting.xmltags;
 
 /**
  * @author Clinton Begin
+ *
+ *  用于描述动态 SQL 中 <if> 标签的内容。XMLLanguageDriver 在解析 Mapper SQL 配置生成SQL Source。
  */
 public class IfSqlNode implements SqlNode {
   private final ExpressionEvaluator evaluator;

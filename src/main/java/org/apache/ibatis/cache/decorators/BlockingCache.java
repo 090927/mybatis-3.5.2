@@ -32,6 +32,9 @@ import org.apache.ibatis.cache.CacheException;
  *
  * @author Eduardo Macarron
  *
+ *
+ *  阻塞版本的，缓存装饰器。能保证，同一时间只有一个线程到缓存，查找指定 key 对应的数据。
+ *
  */
 public class BlockingCache implements Cache {
 

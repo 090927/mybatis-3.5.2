@@ -25,6 +25,7 @@ import org.apache.ibatis.cache.decorators.TransactionalCache;
  */
 public class TransactionalCacheManager {
 
+  // 通过 Map 来维护，二级缓存对应 `TransactionalCache` 实例。
   private final Map<Cache, TransactionalCache> transactionalCaches = new HashMap<>();
 
   public void clear(Cache cache) {
@@ -52,6 +53,10 @@ public class TransactionalCacheManager {
   }
 
   private TransactionalCache getTransactionalCache(Cache cache) {
+    /**
+     * 获取二级缓存对应 `TransactionalCache` 对象。
+     *  1、如果获取不到，则创建放入缓存中。
+     */
     return transactionalCaches.computeIfAbsent(cache, TransactionalCache::new);
   }
 

@@ -611,10 +611,18 @@ public class Configuration {
     return newExecutor(transaction, defaultExecutorType);
   }
 
+  /**
+   * 工厂方法，返回一个 `Executor` 对象。
+   * @param transaction
+   * @param executorType
+   * @return
+   */
   public Executor newExecutor(Transaction transaction, ExecutorType executorType) {
     executorType = executorType == null ? defaultExecutorType : executorType;
     executorType = executorType == null ? ExecutorType.SIMPLE : executorType;
     Executor executor;
+
+    // 根据 executorType 类型创建 Executor 对象。
     if (ExecutorType.BATCH == executorType) {
       executor = new BatchExecutor(this, transaction);
     } else if (ExecutorType.REUSE == executorType) {
@@ -622,6 +630,11 @@ public class Configuration {
     } else {
       executor = new SimpleExecutor(this, transaction);
     }
+
+    /**
+     * 开启二级缓存,则使用 `CachingExecutor` 对 Executor 进行装饰。
+     * {@link CachingExecutor#CachingExecutor(Executor)}
+     */
     if (cacheEnabled) {
       executor = new CachingExecutor(executor);
     }

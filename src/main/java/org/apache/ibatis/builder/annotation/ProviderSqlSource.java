@@ -32,6 +32,8 @@ import org.apache.ibatis.session.Configuration;
 /**
  * @author Clinton Begin
  * @author Kazuki Shimizu
+ *
+ *  用于描述 通过 @Select、@SelectProvider 等注解配置的SQL 资源信息。
  */
 public class ProviderSqlSource implements SqlSource {
 

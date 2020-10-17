@@ -31,6 +31,8 @@ import org.apache.ibatis.session.Configuration;
  *
  * @since 3.2.0
  * @author Eduardo Macarron
+ *
+ *  用于描述 Mapper XML 文件中配置的SQL 资源，与 `DynamicSqlSource` 不同，这些SQL 语句在解析XML 配置的时候就能确定。
  */
 public class RawSqlSource implements SqlSource {
 

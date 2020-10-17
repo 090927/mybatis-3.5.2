@@ -20,8 +20,12 @@ import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.SqlSource;
 import org.apache.ibatis.session.Configuration;
 
+import java.util.Map;
+
 /**
  * @author Clinton Begin
+ *
+ *  用于描述 Mapper XML 文件中配置的SQL资源信息。这些SQL 通常包含动态SQL 配置或者 ${} 信息占位符。需要在 Mapper 调用时才能确定具体SQL 语句。
  */
 public class DynamicSqlSource implements SqlSource {
 
@@ -35,11 +39,27 @@ public class DynamicSqlSource implements SqlSource {
 
   @Override
   public BoundSql getBoundSql(Object parameterObject) {
+
+    // 通过参数对象创建动态 SQL 上下文。
     DynamicContext context = new DynamicContext(configuration, parameterObject);
+
+    /**
+     * 调用 apply
+     */
     rootSqlNode.apply(context);
+
+    // 创建 sqlSourceBuilder 对象。
     SqlSourceBuilder sqlSourceParser = new SqlSourceBuilder(configuration);
     Class<?> parameterType = parameterObject == null ? Object.class : parameterObject.getClass();
+
+    /**
+     * 对 SQL 内容进一步处理，生成 StaticSqlSource 对象 {@link SqlSourceBuilder#parse(String, Class, Map)}
+     */
     SqlSource sqlSource = sqlSourceParser.parse(context.getSql(), parameterType, context.getBindings());
+
+    /**
+     * 获得 boundSql 实例 {@link DynamicSqlSource#getBoundSql(Object)}
+     */
     BoundSql boundSql = sqlSource.getBoundSql(parameterObject);
     context.getBindings().forEach(boundSql::setAdditionalParameter);
     return boundSql;

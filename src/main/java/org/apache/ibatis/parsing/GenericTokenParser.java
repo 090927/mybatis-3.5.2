@@ -35,14 +35,23 @@ public class GenericTokenParser {
       return "";
     }
     // search open token
+    // 获取第一个 #{ 在 SQL 中的位置。
     int start = text.indexOf(openToken);
+
+    // -1 说明不存在任何 #{ 参数占位符。
     if (start == -1) {
       return text;
     }
+
+    // 转换为 char 数组
     char[] src = text.toCharArray();
+
+    // 用于记录已解析 #{ 或 } 偏移量，避免重复解析
     int offset = 0;
     final StringBuilder builder = new StringBuilder();
     StringBuilder expression = null;
+
+    // 遍历获取所有 #{} 参数占位符的内容。
     while (start > -1) {
       if (start > 0 && src[start - 1] == '\\') {
         // this open token is escaped. remove the backslash and continue.
@@ -74,6 +83,10 @@ public class GenericTokenParser {
           builder.append(src, start, src.length - start);
           offset = src.length;
         } else {
+
+          /**
+           * 调用 TokenHandler 的 handleToken 方法替换参数占位符。{@link org.apache.ibatis.builder.SqlSourceBuilder.ParameterMappingTokenHandler#handleToken(String)}
+           */
           builder.append(handler.handleToken(expression.toString()));
           offset = end + closeToken.length();
         }

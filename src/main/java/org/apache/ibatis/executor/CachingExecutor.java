@@ -42,6 +42,8 @@ import org.apache.ibatis.transaction.Transaction;
 public class CachingExecutor implements Executor {
 
   private final Executor delegate;
+
+  // 用于管理，所有二级缓存对象。
   private final TransactionalCacheManager tcm = new TransactionalCacheManager();
 
   public CachingExecutor(Executor delegate) {
@@ -75,6 +77,10 @@ public class CachingExecutor implements Executor {
 
   @Override
   public int update(MappedStatement ms, Object parameterObject) throws SQLException {
+
+    /**
+     * 如果需要刷新，则更新缓存。 {@link #flushCacheIfRequired(MappedStatement)}
+     */
     flushCacheIfRequired(ms);
     return delegate.update(ms, parameterObject);
   }
@@ -82,7 +88,13 @@ public class CachingExecutor implements Executor {
   @Override
   public <E> List<E> query(MappedStatement ms, Object parameterObject, RowBounds rowBounds, ResultHandler resultHandler) throws SQLException {
     BoundSql boundSql = ms.getBoundSql(parameterObject);
+
+    /**
+     * 创建缓存 key {@link BaseExecutor#createCacheKey(MappedStatement, Object, RowBounds, BoundSql)}
+     */
     CacheKey key = createCacheKey(ms, parameterObject, rowBounds, boundSql);
+
+    // 核心查询
     return query(ms, parameterObject, rowBounds, resultHandler, key, boundSql);
   }
 
@@ -95,15 +107,29 @@ public class CachingExecutor implements Executor {
   @Override
   public <E> List<E> query(MappedStatement ms, Object parameterObject, RowBounds rowBounds, ResultHandler resultHandler, CacheKey key, BoundSql boundSql)
       throws SQLException {
+
+    // 获取 MappedStatement 对象中维护二级缓存对象。
     Cache cache = ms.getCache();
     if (cache != null) {
+
+      /**
+       * 判断是否需要刷新二级缓存 {@link #flushCacheIfRequired(MappedStatement)}
+       */
       flushCacheIfRequired(ms);
       if (ms.isUseCache() && resultHandler == null) {
         ensureNoOutParams(ms, boundSql);
         @SuppressWarnings("unchecked")
+
+          // 从 `MappedStatement` 对象，对应的二级缓存中获取数据。
         List<E> list = (List<E>) tcm.getObject(cache, key);
         if (list == null) {
+
+          /**
+           * 如果没有，则查询数据库 {@link BaseExecutor#query(MappedStatement, Object, RowBounds, ResultHandler, CacheKey, BoundSql)}
+           */
           list = delegate.query(ms, parameterObject, rowBounds, resultHandler, key, boundSql);
+
+          // 然后将数据，存放到 `MappedStatement` 对应的二级缓存中。
           tcm.putObject(cache, key, list); // issue #578 and #116
         }
         return list;

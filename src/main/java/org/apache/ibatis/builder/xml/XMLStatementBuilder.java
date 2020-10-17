@@ -103,6 +103,11 @@ public class XMLStatementBuilder extends BaseBuilder {
           ? Jdbc3KeyGenerator.INSTANCE : NoKeyGenerator.INSTANCE;
     }
 
+    /**
+     * 创建 SqlSource 对象 【动态SQL】
+     *
+     * {@link org.apache.ibatis.scripting.xmltags.XMLLanguageDriver#createSqlSource(Configuration, XNode, Class)}
+     */
     SqlSource sqlSource = langDriver.createSqlSource(configuration, context, parameterTypeClass);
 
     // 默认 statement 类型为，PREPARED

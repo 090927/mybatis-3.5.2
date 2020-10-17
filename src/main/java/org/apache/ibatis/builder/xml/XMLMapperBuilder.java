@@ -132,6 +132,10 @@ public class XMLMapperBuilder extends BaseBuilder {
 
       // 解析标签
       cacheRefElement(context.evalNode("cache-ref"));
+
+      /**
+       * 解析 <cache/> 标签 {@link #cacheElement(XNode)}
+       */
       cacheElement(context.evalNode("cache"));
       parameterMapElement(context.evalNodes("/mapper/parameterMap"));
       resultMapElements(context.evalNodes("/mapper/resultMap"));
@@ -238,6 +242,10 @@ public class XMLMapperBuilder extends BaseBuilder {
       boolean readWrite = !context.getBooleanAttribute("readOnly", false);
       boolean blocking = context.getBooleanAttribute("blocking", false);
       Properties props = context.getChildrenAsProperties();
+
+      /**
+       * 创建二级缓存实例 {@link MapperBuilderAssistant#useNewCache(Class, Class, Long, Integer, boolean, boolean, Properties)}
+       */
       builderAssistant.useNewCache(typeClass, evictionClass, flushInterval, size, readWrite, blocking, props);
     }
   }

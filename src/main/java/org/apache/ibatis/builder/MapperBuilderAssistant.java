@@ -294,6 +294,10 @@ public class MapperBuilderAssistant extends BaseBuilder {
     }
 
     MappedStatement statement = statementBuilder.build();
+
+    /**
+     * {@link Configuration#addMappedStatement(MappedStatement)}
+     */
     configuration.addMappedStatement(statement);
     return statement;
   }

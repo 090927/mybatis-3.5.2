@@ -46,6 +46,8 @@ import org.apache.ibatis.type.TypeHandlerRegistry;
 
 /**
  * @author Clinton Begin
+ *
+ *  用于处理一些通用的逻辑，其中 一级缓存相关的逻辑。
  */
 public abstract class BaseExecutor implements Executor {
 
@@ -55,7 +57,11 @@ public abstract class BaseExecutor implements Executor {
   protected Executor wrapper;
 
   protected ConcurrentLinkedQueue<DeferredLoad> deferredLoads;
+
+  // 一级缓存对象。
   protected PerpetualCache localCache;
+
+  // 存储过程输出，参数缓存。
   protected PerpetualCache localOutputParameterCache;
   protected Configuration configuration;
 
@@ -113,6 +119,10 @@ public abstract class BaseExecutor implements Executor {
     if (closed) {
       throw new ExecutorException("Executor was closed.");
     }
+
+    /**
+     * 清空缓存。{@link #clearLocalCache()}
+     */
     clearLocalCache();
     return doUpdate(ms, parameter);
   }
@@ -135,7 +145,9 @@ public abstract class BaseExecutor implements Executor {
     // 获取 BoundSql 对象，BoundSql 为动态 SQL 解析生成的SQL 语句和参数映射信息封装。
     BoundSql boundSql = ms.getBoundSql(parameter);
 
-    // 创建，缓存 key .
+    /**
+     * 创建，缓存 key {@link #createCacheKey(MappedStatement, Object, RowBounds, BoundSql)}
+     */
     CacheKey key = createCacheKey(ms, parameter, rowBounds, boundSql);
 
     // 【 query 】
@@ -156,7 +168,10 @@ public abstract class BaseExecutor implements Executor {
     try {
       queryStack++;
 
-      // 从缓存中获取结果。
+      /**
+       * 从缓存中获取结果。
+       *  缓存 put 是在 `queryFromDatabase`。
+       */
       list = resultHandler == null ? (List<E>) localCache.getObject(key) : null;
       if (list != null) {
         handleLocallyCachedOutputParameters(ms, key, parameter, boundSql);
@@ -203,6 +218,14 @@ public abstract class BaseExecutor implements Executor {
     }
   }
 
+  /**
+   * 创建缓存 Key
+   * @param ms
+   * @param parameterObject
+   * @param rowBounds
+   * @param boundSql
+   * @return
+   */
   @Override
   public CacheKey createCacheKey(MappedStatement ms, Object parameterObject, RowBounds rowBounds, BoundSql boundSql) {
     if (closed) {
@@ -210,12 +233,18 @@ public abstract class BaseExecutor implements Executor {
     }
     CacheKey cacheKey = new CacheKey();
     cacheKey.update(ms.getId());
+
+    // 偏移量
     cacheKey.update(rowBounds.getOffset());
+
+    // 条数
     cacheKey.update(rowBounds.getLimit());
     cacheKey.update(boundSql.getSql());
     List<ParameterMapping> parameterMappings = boundSql.getParameterMappings();
     TypeHandlerRegistry typeHandlerRegistry = ms.getConfiguration().getTypeHandlerRegistry();
     // mimic DefaultParameterHandler logic
+
+    // 所有参数值
     for (ParameterMapping parameterMapping : parameterMappings) {
       if (parameterMapping.getMode() != ParameterMode.OUT) {
         Object value;

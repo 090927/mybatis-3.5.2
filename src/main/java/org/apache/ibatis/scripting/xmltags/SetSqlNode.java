@@ -22,6 +22,8 @@ import org.apache.ibatis.session.Configuration;
 
 /**
  * @author Clinton Begin
+ *
+ *  用于描述 动态SQL 配置 <set></set> 标签
  */
 public class SetSqlNode extends TrimSqlNode {
 

@@ -17,6 +17,8 @@ package org.apache.ibatis.scripting.xmltags;
 
 /**
  * @author Clinton Begin
+ *
+ *  用于描述动态 SQL 中的，静态文本内容。
  */
 public class StaticTextSqlNode implements SqlNode {
   private final String text;

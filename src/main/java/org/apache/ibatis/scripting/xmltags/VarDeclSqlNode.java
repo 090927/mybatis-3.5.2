@@ -17,6 +17,8 @@ package org.apache.ibatis.scripting.xmltags;
 
 /**
  * @author Frank D. Martinez [mnesarco]
+ *
+ *  用于描述动态SQL中 <bind></bind> 标签。
  */
 public class VarDeclSqlNode implements SqlNode {
 

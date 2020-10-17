@@ -19,6 +19,8 @@ import java.util.List;
 
 /**
  * @author Clinton Begin
+ *
+ *  描述一组 SQLNode 对象，通常一个 Mapper 配置多个 SqlNode 对象。
  */
 public class MixedSqlNode implements SqlNode {
   private final List<SqlNode> contents;

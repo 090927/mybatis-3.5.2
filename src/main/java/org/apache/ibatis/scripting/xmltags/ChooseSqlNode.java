@@ -19,6 +19,8 @@ import java.util.List;
 
 /**
  * @author Clinton Begin
+ *
+ *  动态SQL 配置中的 <choose></choose> 标签
  */
 public class ChooseSqlNode implements SqlNode {
   private final SqlNode defaultSqlNode;

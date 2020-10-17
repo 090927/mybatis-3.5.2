@@ -30,7 +30,7 @@ import org.apache.ibatis.transaction.Transaction;
 /**
  * @author Clinton Begin
  *
- *  核心执行器
+ *  核心执行器（模板方法设计模式）
  */
 public interface Executor {
 
