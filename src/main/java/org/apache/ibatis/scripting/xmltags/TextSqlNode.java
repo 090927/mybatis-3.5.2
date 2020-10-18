@@ -47,7 +47,17 @@ public class TextSqlNode implements SqlNode {
 
   @Override
   public boolean apply(DynamicContext context) {
+
+    /**
+     * 对象解析 ${} 参数占位符。
+     *  {@link BindingTokenParser#BindingTokenParser(DynamicContext, Pattern)} 对象处理参数占位符的内容。
+     *  {@link #createParser(TokenHandler)} 创建一个 `GenericTokenParser` 对象。
+     */
     GenericTokenParser parser = createParser(new BindingTokenParser(context, injectionFilter));
+
+    /**
+     * 解析#{} 参数占位符的过程。 {@link GenericTokenParser#parse(String)}
+     */
     context.appendSql(parser.parse(text));
     return true;
   }
@@ -66,14 +76,27 @@ public class TextSqlNode implements SqlNode {
       this.injectionFilter = injectionFilter;
     }
 
+    /**
+     * 对参数 占位符内容进行替换。
+     * @param content
+     * @return
+     */
     @Override
     public String handleToken(String content) {
+
+      // 获取内置参数 `_parameter` 中保存所有参数信息。
       Object parameter = context.getBindings().get("_parameter");
       if (parameter == null) {
         context.getBindings().put("value", null);
       } else if (SimpleTypeRegistry.isSimpleType(parameter.getClass())) {
+
+        // 将参数对象添加到 ，ContextMap 对象中。
         context.getBindings().put("value", parameter);
       }
+
+      /**
+       * 通过 OGNL 表达式获取参数值 {@link OgnlCache#getValue(String, Object)}
+        */
       Object value = OgnlCache.getValue(content, context.getBindings());
       String srtValue = value == null ? "" : String.valueOf(value); // issue #274 return "" instead of "null"
       checkInjection(srtValue);

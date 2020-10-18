@@ -100,6 +100,11 @@ import org.apache.ibatis.type.TypeHandlerRegistry;
  *
  *
  *  MyBatiis 配置信息。
+ *
+ *  作用：
+ *    1、描述配置信息，项目启动时，MyBatis 的所有配置信息都被转换为 Configuration 对象。
+ *    2、作为 `中介者` 简化MyBatis 各个组件之间的交互。解决各个组件错综复杂的调用关系。
+ *    3、作为 Executor、ParameterHandler、ResultSetHandler、StatementHandler 组件的工厂创建这些组件的实例。
  */
 public class Configuration {
 
@@ -135,6 +140,7 @@ public class Configuration {
   protected ObjectFactory objectFactory = new DefaultObjectFactory();
   protected ObjectWrapperFactory objectWrapperFactory = new DefaultObjectWrapperFactory();
 
+  // 表示开启懒加载
   protected boolean lazyLoadingEnabled = false;
   protected ProxyFactory proxyFactory = new JavassistProxyFactory(); // #224 Using internal Javassist instead of OGNL
 
@@ -590,6 +596,8 @@ public class Configuration {
 
   public ParameterHandler newParameterHandler(MappedStatement mappedStatement, Object parameterObject, BoundSql boundSql) {
     ParameterHandler parameterHandler = mappedStatement.getLang().createParameterHandler(mappedStatement, parameterObject, boundSql);
+
+    // 创建代理对象
     parameterHandler = (ParameterHandler) interceptorChain.pluginAll(parameterHandler);
     return parameterHandler;
   }
@@ -597,12 +605,15 @@ public class Configuration {
   public ResultSetHandler newResultSetHandler(Executor executor, MappedStatement mappedStatement, RowBounds rowBounds, ParameterHandler parameterHandler,
       ResultHandler resultHandler, BoundSql boundSql) {
     ResultSetHandler resultSetHandler = new DefaultResultSetHandler(executor, mappedStatement, parameterHandler, resultHandler, boundSql, rowBounds);
+
+    // 创建代理对象
     resultSetHandler = (ResultSetHandler) interceptorChain.pluginAll(resultSetHandler);
     return resultSetHandler;
   }
 
   public StatementHandler newStatementHandler(Executor executor, MappedStatement mappedStatement, Object parameterObject, RowBounds rowBounds, ResultHandler resultHandler, BoundSql boundSql) {
     StatementHandler statementHandler = new RoutingStatementHandler(executor, mappedStatement, parameterObject, rowBounds, resultHandler, boundSql);
+    // 创建代理对象
     statementHandler = (StatementHandler) interceptorChain.pluginAll(statementHandler);
     return statementHandler;
   }
@@ -638,6 +649,8 @@ public class Configuration {
     if (cacheEnabled) {
       executor = new CachingExecutor(executor);
     }
+
+    // 创建代理对象
     executor = (Executor) interceptorChain.pluginAll(executor);
     return executor;
   }

@@ -23,6 +23,9 @@ import org.apache.ibatis.parsing.XNode;
 import org.apache.ibatis.scripting.defaults.DefaultParameterHandler;
 import org.apache.ibatis.session.Configuration;
 
+/**
+ * 解析 SQL 配置，将SQL 配置转换为 SqlSource
+ */
 public interface LanguageDriver {
 
   /**

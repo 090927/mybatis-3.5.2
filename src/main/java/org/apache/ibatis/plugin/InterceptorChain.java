@@ -21,13 +21,24 @@ import java.util.List;
 
 /**
  * @author Clinton Begin
+ *
+ *  拦截器调用链
  */
 public class InterceptorChain {
 
   private final List<Interceptor> interceptors = new ArrayList<>();
 
+  /**
+   * 调用所有拦截器对象的 plugin 方法执行拦截逻辑。
+   * @param target
+   * @return
+   */
   public Object pluginAll(Object target) {
     for (Interceptor interceptor : interceptors) {
+
+      /**
+       * 最终都是调用 {@link Plugin#wrap(Object, Interceptor)}
+       */
       target = interceptor.plugin(target);
     }
     return target;

@@ -138,6 +138,10 @@ public class XMLMapperBuilder extends BaseBuilder {
        */
       cacheElement(context.evalNode("cache"));
       parameterMapElement(context.evalNodes("/mapper/parameterMap"));
+
+      /**
+       * 解析 <resultMap> 标签 {@link #resultMapElements(List)}
+       */
       resultMapElements(context.evalNodes("/mapper/resultMap"));
       sqlElement(context.evalNodes("/mapper/sql"));
 
@@ -279,6 +283,10 @@ public class XMLMapperBuilder extends BaseBuilder {
   private void resultMapElements(List<XNode> list) throws Exception {
     for (XNode resultMapNode : list) {
       try {
+
+        /**
+         * 解析 <resultMap> 标签 {@link #resultMapElement(XNode)}
+         */
         resultMapElement(resultMapNode);
       } catch (IncompleteElementException e) {
         // ignore, it will be retried
@@ -290,8 +298,18 @@ public class XMLMapperBuilder extends BaseBuilder {
     return resultMapElement(resultMapNode, Collections.emptyList(), null);
   }
 
+  /**
+   * 解析 resultMap 标签。
+   * @param resultMapNode
+   * @param additionalResultMappings
+   * @param enclosingType
+   * @return
+   * @throws Exception
+   */
   private ResultMap resultMapElement(XNode resultMapNode, List<ResultMapping> additionalResultMappings, Class<?> enclosingType) throws Exception {
     ErrorContext.instance().activity("processing " + resultMapNode.getValueBasedIdentifier());
+
+    // 属性优先级按照， type -> ofType -> resultType -> javaType
     String type = resultMapNode.getStringAttribute("type",
         resultMapNode.getStringAttribute("ofType",
             resultMapNode.getStringAttribute("resultType",
@@ -301,13 +319,23 @@ public class XMLMapperBuilder extends BaseBuilder {
       typeClass = inheritEnclosingType(resultMapNode, enclosingType);
     }
     Discriminator discriminator = null;
+
+    // 参数映射表
     List<ResultMapping> resultMappings = new ArrayList<>();
     resultMappings.addAll(additionalResultMappings);
     List<XNode> resultChildren = resultMapNode.getChildren();
     for (XNode resultChild : resultChildren) {
       if ("constructor".equals(resultChild.getName())) {
+
+        /**
+         * 解析 <constructor></> 标签
+         */
         processConstructorElement(resultChild, typeClass, resultMappings);
       } else if ("discriminator".equals(resultChild.getName())) {
+
+        /**
+         *  解析 <discriminator></> 标签
+         */
         discriminator = processDiscriminatorElement(resultChild, typeClass, resultMappings);
       } else {
         List<ResultFlag> flags = new ArrayList<>();
@@ -321,8 +349,13 @@ public class XMLMapperBuilder extends BaseBuilder {
             resultMapNode.getValueBasedIdentifier());
     String extend = resultMapNode.getStringAttribute("extends");
     Boolean autoMapping = resultMapNode.getBooleanAttribute("autoMapping");
+
+    // 通过 ResultMapResolver 对象，构建 ResultMap 对象。
     ResultMapResolver resultMapResolver = new ResultMapResolver(builderAssistant, id, typeClass, extend, discriminator, resultMappings, autoMapping);
     try {
+      /**
+       * 构建 ResultMap 对象。 {@link ResultMapResolver#resolve()}
+       */
       return resultMapResolver.resolve();
     } catch (IncompleteElementException  e) {
       configuration.addIncompleteResultMap(resultMapResolver);

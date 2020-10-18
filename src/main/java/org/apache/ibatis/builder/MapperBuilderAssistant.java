@@ -184,13 +184,19 @@ public class MapperBuilderAssistant extends BaseBuilder {
     extend = applyCurrentNamespace(extend, true);
 
     if (extend != null) {
+
+      // 如果继承了其他 ResultMap
       if (!configuration.hasResultMap(extend)) {
         throw new IncompleteElementException("Could not find a parent resultmap with id '" + extend + "'");
       }
+
+      // 获取继承的 父 ResultMap 对象。
       ResultMap resultMap = configuration.getResultMap(extend);
       List<ResultMapping> extendedResultMappings = new ArrayList<>(resultMap.getResultMappings());
       extendedResultMappings.removeAll(resultMappings);
       // Remove parent constructor if this resultMap declares a constructor.
+
+      // 如果父 ResultMap 定义的构造器映射，则移除构造器映射。
       boolean declaresConstructor = false;
       for (ResultMapping resultMapping : resultMappings) {
         if (resultMapping.getFlags().contains(ResultFlag.CONSTRUCTOR)) {
@@ -201,11 +207,19 @@ public class MapperBuilderAssistant extends BaseBuilder {
       if (declaresConstructor) {
         extendedResultMappings.removeIf(resultMapping -> resultMapping.getFlags().contains(ResultFlag.CONSTRUCTOR));
       }
+
+      // 将 父 ResultMap 配置的映射信息添加到当前的 ResultMap 中。
       resultMappings.addAll(extendedResultMappings);
     }
+
+    // 通过建造者模式，创建 ResultMap 对象
     ResultMap resultMap = new ResultMap.Builder(configuration, id, type, resultMappings, autoMapping)
         .discriminator(discriminator)
         .build();
+
+    /**
+     *  将 ResultMap 对象添加到 Configuration {@link Configuration#addResultMap(ResultMap)}
+     */
     configuration.addResultMap(resultMap);
     return resultMap;
   }

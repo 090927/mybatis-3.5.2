@@ -22,22 +22,34 @@ import org.apache.ibatis.plugin.Plugin;
 
 import java.util.Properties;
 
+/**
+ * 自定义 MyBatis 插件。
+ */
 @Intercepts({})
 public class ExamplePlugin implements Interceptor {
   private Properties properties;
 
   @Override
   public Object intercept(Invocation invocation) throws Throwable {
+
+    /**
+     *  TODO 自定义拦截的逻辑
+     *  执行目标方法 {@link Invocation#proceed()}
+     */
     return invocation.proceed();
   }
 
   @Override
   public Object plugin(Object target) {
+    /**
+     * 创建动态代理对象 {@link Plugin#wrap(Object, Interceptor)}
+     */
     return Plugin.wrap(target, this);
   }
 
   @Override
   public void setProperties(Properties properties) {
+    // 设置插件的属性信息。
     this.properties = properties;
   }
 

@@ -44,6 +44,10 @@ public class ResultMapResolver {
   }
 
   public ResultMap resolve() {
+
+    /**
+     * {@link MapperBuilderAssistant#addResultMap(String, Class, String, Discriminator, List, Boolean)}
+     */
     return assistant.addResultMap(this.id, this.type, this.extend, this.discriminator, this.resultMappings, this.autoMapping);
   }
 
