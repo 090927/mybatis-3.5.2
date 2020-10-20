@@ -100,7 +100,9 @@ public class XMLMapperBuilder extends BaseBuilder {
       // 将资源路径添加到 Configuration 对象中
       configuration.addLoadedResource(resource);
 
-      // 【 bindMapperForNamespace 】
+      /**
+       *  bindMapperForNamespace {@link #bindMapperForNamespace()}
+       */
       bindMapperForNamespace();
     }
 
@@ -146,7 +148,7 @@ public class XMLMapperBuilder extends BaseBuilder {
       sqlElement(context.evalNodes("/mapper/sql"));
 
       /**
-       * 解析 select 、insert 标签 {@link #buildStatementFromContext(List)}
+       * 解析 select 、insert、update、delete 标签 {@link #buildStatementFromContext(List)}
        */
       buildStatementFromContext(context.evalNodes("select|insert|update|delete"));
     } catch (Exception e) {
@@ -165,6 +167,8 @@ public class XMLMapperBuilder extends BaseBuilder {
 
   private void buildStatementFromContext(List<XNode> list, String requiredDatabaseId) {
     for (XNode context : list) {
+
+      // 通过 `XMLStatementBuilder` 对象对，select、update、insert、delete 标签进行解析。
       final XMLStatementBuilder statementParser = new XMLStatementBuilder(configuration, builderAssistant, context, requiredDatabaseId);
       try {
 
@@ -488,6 +492,9 @@ public class XMLMapperBuilder extends BaseBuilder {
     }
   }
 
+  /**
+   * 将 Mapper 绑定 namespace.
+   */
   private void bindMapperForNamespace() {
     String namespace = builderAssistant.getCurrentNamespace();
     if (namespace != null) {

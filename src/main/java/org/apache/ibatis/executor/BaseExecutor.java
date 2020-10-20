@@ -169,7 +169,7 @@ public abstract class BaseExecutor implements Executor {
       queryStack++;
 
       /**
-       * 从缓存中获取结果。
+       * 从缓存中获取结果。【一级缓存，默认开启】
        *  缓存 put 是在 `queryFromDatabase`。
        */
       list = resultHandler == null ? (List<E>) localCache.getObject(key) : null;
@@ -178,7 +178,7 @@ public abstract class BaseExecutor implements Executor {
       } else {
 
         /**
-         * 若缓存中不存在，则 调用 {@link #queryFromDatabase(MappedStatement, Object, RowBounds, ResultHandler, CacheKey, BoundSql)} 查询数据库。
+         * 若缓存中不存在，查询数据库 {@link #queryFromDatabase(MappedStatement, Object, RowBounds, ResultHandler, CacheKey, BoundSql)} 查询数据库。
          */
         list = queryFromDatabase(ms, parameter, rowBounds, resultHandler, key, boundSql);
       }

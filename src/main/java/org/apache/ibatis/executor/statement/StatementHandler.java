@@ -27,6 +27,8 @@ import org.apache.ibatis.session.ResultHandler;
 
 /**
  * @author Clinton Begin
+ *
+ *  封装了对jdbc Statement 对象的操作，比如为 Statement 对象设置参数、调用 Statement 接口提供的方法与数据库交互，等等。
  */
 public interface StatementHandler {
 
@@ -80,7 +82,7 @@ public interface StatementHandler {
 
   /**
    *
-   *  获取 Mapper 中配置的 SQL 信息，
+   *  获取 Mapper 中配置的 SQL 信息，BoundSql 封装动态SQL解析后的SQL 文本，和参数映射。
    *
    * @return
    */

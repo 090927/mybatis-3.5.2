@@ -17,6 +17,8 @@ package org.apache.ibatis.session;
 
 /**
  * @author Clinton Begin
+ *
+ *  将查询结果转换为 Java 对象。
  */
 public interface ResultHandler<T> {
 

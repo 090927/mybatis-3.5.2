@@ -30,6 +30,8 @@ import org.apache.ibatis.session.SqlSession;
  * @author Clinton Begin
  * @author Eduardo Macarron
  * @author Lasse Voss
+ *
+ *  用于 Mapper 接口与 MapperProxyFactory 对象之间的对应关系。
  */
 public class MapperRegistry {
 

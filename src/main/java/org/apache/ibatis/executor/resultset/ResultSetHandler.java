@@ -24,6 +24,8 @@ import org.apache.ibatis.cursor.Cursor;
 
 /**
  * @author Clinton Begin
+ *
+ *  用于在 StatementHandler 对象执行完查询操作或存储过程后，对结果集或存储过程的执行结果进行处理。
  */
 public interface ResultSetHandler {
 

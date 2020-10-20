@@ -29,6 +29,8 @@ import org.apache.ibatis.session.SqlSession;
 /**
  * @author Clinton Begin
  * @author Eduardo Macarron
+ *
+ *  Mybatis 使用 MapperProxy 实现动态代理。
  */
 public class MapperProxy<T> implements InvocationHandler, Serializable {
 

@@ -144,7 +144,9 @@ public class DefaultSqlSession implements SqlSession {
   public <E> List<E> selectList(String statement, Object parameter, RowBounds rowBounds) {
     try {
 
-      // 根据 MapperId 获取 `MappedStatement` 信息。
+      /**
+       * 根据 MapperId 获取 `MappedStatement` 信息。{@link Configuration#getMappedStatement(String)}
+       */
       MappedStatement ms = configuration.getMappedStatement(statement);
 
       /**
@@ -199,7 +201,13 @@ public class DefaultSqlSession implements SqlSession {
   public int update(String statement, Object parameter) {
     try {
       dirty = true;
+
+      // 获取 MappedStatement
       MappedStatement ms = configuration.getMappedStatement(statement);
+
+      /**
+       * {@link org.apache.ibatis.executor.BaseExecutor#update(MappedStatement, Object)}
+       */
       return executor.update(ms, wrapCollection(parameter));
     } catch (Exception e) {
       throw ExceptionFactory.wrapException("Error updating database.  Cause: " + e, e);

@@ -310,7 +310,7 @@ public class MapperBuilderAssistant extends BaseBuilder {
     MappedStatement statement = statementBuilder.build();
 
     /**
-     * {@link Configuration#addMappedStatement(MappedStatement)}
+     *  注册 `MappedStatement` {@link Configuration#addMappedStatement(MappedStatement)}
      */
     configuration.addMappedStatement(statement);
     return statement;

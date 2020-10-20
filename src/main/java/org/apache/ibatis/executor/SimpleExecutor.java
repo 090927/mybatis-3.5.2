@@ -61,7 +61,12 @@ public class SimpleExecutor extends BaseExecutor {
     try {
       Configuration configuration = ms.getConfiguration();
 
-      // 获取 StatementHandler 对象。
+      /**
+       * 获取 StatementHandler 对象。{@link Configuration#newStatementHandler(Executor, MappedStatement, Object, RowBounds, ResultHandler, BoundSql)}
+       *
+       *  返回 `{@link org.apache.ibatis.executor.statement.RoutingStatementHandler#RoutingStatementHandler(Executor, MappedStatement, Object, RowBounds, ResultHandler, BoundSql)} `
+       *    1、会根据  Mapper 的 statementType
+       */
       StatementHandler handler = configuration.newStatementHandler(wrapper, ms, parameter, rowBounds, resultHandler, boundSql);
 
       /**

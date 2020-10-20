@@ -98,7 +98,9 @@ public class XMLConfigBuilder extends BaseBuilder {
     }
     parsed = true;
 
-    // 对 XNode 进行处理。
+    /**
+     * 对 XNode 进行处理。 {@link #parseConfiguration(XNode)}
+     */
     parseConfiguration(parser.evalNode("/configuration"));
     return configuration;
   }
@@ -411,18 +413,26 @@ public class XMLConfigBuilder extends BaseBuilder {
             XMLMapperBuilder mapperParser = new XMLMapperBuilder(inputStream, configuration, resource, configuration.getSqlFragments());
 
             /**
-             * {@link XMLMapperBuilder#parse()}
+             * Mapper 解析 {@link XMLMapperBuilder#parse()}
              */
             mapperParser.parse();
           } else if (resource == null && url != null && mapperClass == null) {
             ErrorContext.instance().resource(url);
             InputStream inputStream = Resources.getUrlAsStream(url);
             XMLMapperBuilder mapperParser = new XMLMapperBuilder(inputStream, configuration, url, configuration.getSqlFragments());
+
+            /**
+             *  Mapper 解析 {@link XMLMapperBuilder#parse()}
+             */
             mapperParser.parse();
           } else if (resource == null && url == null && mapperClass != null) {
 
             // 通过 class 属性指定接口的完全限定名
             Class<?> mapperInterface = Resources.classForName(mapperClass);
+
+            /**
+             *  注册 Mapper {@link Configuration#addMapper(Class)}
+             */
             configuration.addMapper(mapperInterface);
           } else {
             throw new BuilderException("A mapper element may only specify a url, resource or class, but not more than one.");

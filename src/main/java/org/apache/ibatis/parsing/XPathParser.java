@@ -42,6 +42,8 @@ import org.xml.sax.SAXParseException;
 /**
  * @author Clinton Begin
  * @author Kazuki Shimizu
+ *
+ *  封装，对XML 的解析，省去 Document、XPath 对象的创建过程。
  */
 public class XPathParser {
 

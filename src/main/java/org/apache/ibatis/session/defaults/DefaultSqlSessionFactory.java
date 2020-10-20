@@ -42,6 +42,10 @@ public class DefaultSqlSessionFactory implements SqlSessionFactory {
     this.configuration = configuration;
   }
 
+  /**
+   * 创建 SqlSession 对象。
+   * @return
+   */
   @Override
   public SqlSession openSession() {
 
@@ -103,10 +107,16 @@ public class DefaultSqlSessionFactory implements SqlSessionFactory {
       // 创建事务管理器
       tx = transactionFactory.newTransaction(environment.getDataSource(), level, autoCommit);
 
-      // 根据 MyBatis 主配置文件中指定 Executor 类型创建对应 Executor 实例。
+      /**
+       * 根据 MyBatis 主配置文件中指定 Executor 类型创建对应 Executor 实例。{@link Configuration#newExecutor(Transaction, ExecutorType)}
+       *
+       *  真正执行SQL 操作的是 `Executor` 对象。
+       */
       final Executor executor = configuration.newExecutor(tx, execType);
 
-      // 创建 DefaultSqlSession 实例。
+      /**
+       * 创建 DefaultSqlSession 实例 {@link DefaultSqlSession#DefaultSqlSession(Configuration, Executor, boolean)}
+       */
       return new DefaultSqlSession(configuration, executor, autoCommit);
     } catch (Exception e) {
       closeTransaction(tx); // may have fetched a connection so lets call close()

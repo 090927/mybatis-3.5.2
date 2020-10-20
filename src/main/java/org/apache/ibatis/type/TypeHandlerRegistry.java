@@ -50,6 +50,8 @@ import org.apache.ibatis.io.Resources;
 /**
  * @author Clinton Begin
  * @author Kazuki Shimizu
+ *
+ *  Java 类型与 TypeHandler 之间的映射关系。
  */
 public final class TypeHandlerRegistry {
 
@@ -62,6 +64,10 @@ public final class TypeHandlerRegistry {
 
   private Class<? extends TypeHandler> defaultEnumTypeHandler = EnumTypeHandler.class;
 
+
+  /**
+   * 注册所有类型 TypeHandler.
+   */
   public TypeHandlerRegistry() {
     register(Boolean.class, new BooleanTypeHandler());
     register(boolean.class, new BooleanTypeHandler());

@@ -29,6 +29,8 @@ import org.apache.ibatis.transaction.TransactionFactory;
  * @author Clinton Begin
  *
  * @see JdbcTransaction
+ *
+ *  JDBC 中对 Connection 对象实现事务管理。
  */
 public class JdbcTransactionFactory implements TransactionFactory {
 

@@ -22,6 +22,8 @@ import java.sql.SQLException;
 
 /**
  * @author Clinton Begin
+ *
+ *  类型处理器，用于处理 Java 类型与JDBC 类型之间的映射。
  */
 public interface TypeHandler<T> {
 

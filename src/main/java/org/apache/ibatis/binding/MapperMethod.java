@@ -123,6 +123,12 @@ public class MapperMethod {
     return result;
   }
 
+  /**
+   * 统计行数
+   *
+   * @param rowCount
+   * @return
+   */
   private Object rowCountResult(int rowCount) {
     final Object result;
     if (method.returnsVoid()) {
@@ -251,6 +257,10 @@ public class MapperMethod {
 
       // 获取声明该方法的类或接口的 Class对象。
       final Class<?> declaringClass = method.getDeclaringClass();
+
+      /**
+       *  描述 Mapper SQL 配置信息 {@link #resolveMappedStatement(Class, String, Class, Configuration)}
+       */
       MappedStatement ms = resolveMappedStatement(mapperInterface, methodName, declaringClass,
           configuration);
       if (ms == null) {
@@ -289,7 +299,7 @@ public class MapperMethod {
     private MappedStatement resolveMappedStatement(Class<?> mapperInterface, String methodName,
         Class<?> declaringClass, Configuration configuration) {
 
-      // mapperId
+      // 获取 mapper Id
       String statementId = mapperInterface.getName() + "." + methodName;
       if (configuration.hasStatement(statementId)) {
 

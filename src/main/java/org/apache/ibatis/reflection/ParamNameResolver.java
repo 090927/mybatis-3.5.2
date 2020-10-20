@@ -49,6 +49,13 @@ public class ParamNameResolver {
 
   private boolean hasParamAnnotation;
 
+
+  /**
+   * 解析 Mapper 方法参数
+   *
+   * @param config
+   * @param method
+   */
   public ParamNameResolver(Configuration config, Method method) {
     final Class<?>[] paramTypes = method.getParameterTypes();
 
