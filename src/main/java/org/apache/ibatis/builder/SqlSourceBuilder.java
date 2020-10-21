@@ -53,6 +53,8 @@ public class SqlSourceBuilder extends BaseBuilder {
      *  解析#{} 参数占位符的过程。 {@link GenericTokenParser#parse(String)}
      */
     String sql = parser.parse(originalSql);
+
+    // 返回  `staticSqlSource` 对象。
     return new StaticSqlSource(configuration, sql, handler.getParameterMappings());
   }
 
@@ -74,6 +76,12 @@ public class SqlSourceBuilder extends BaseBuilder {
 
     @Override
     public String handleToken(String content) {
+
+      /**
+       * 对占位内容进行解析 {@link #buildParameterMapping(String)}
+       *
+       *  1、添加到 `parameterMappings`
+       */
       parameterMappings.add(buildParameterMapping(content));
       return "?";
     }

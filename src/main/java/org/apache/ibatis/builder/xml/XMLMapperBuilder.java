@@ -89,11 +89,14 @@ public class XMLMapperBuilder extends BaseBuilder {
     this.resource = resource;
   }
 
+  /**
+   * 【 TODO 核心】XmlMapper 解析。
+   */
   public void parse() {
     if (!configuration.isResourceLoaded(resource)) {
 
       /**
-       * 调用 XPathParser 的 evalNode 方法获取根节点对应 XNode 对象 {@link #configurationElement(XNode)}
+       * 解析 Mapper 文件 {@link #configurationElement(XNode)}
        */
       configurationElement(parser.evalNode("/mapper"));
 
@@ -101,7 +104,7 @@ public class XMLMapperBuilder extends BaseBuilder {
       configuration.addLoadedResource(resource);
 
       /**
-       *  bindMapperForNamespace {@link #bindMapperForNamespace()}
+       *  绑定Namespace里面的Class对象 {@link #bindMapperForNamespace()}
        */
       bindMapperForNamespace();
     }
@@ -123,7 +126,7 @@ public class XMLMapperBuilder extends BaseBuilder {
   private void configurationElement(XNode context) {
     try {
 
-      // 获取命名空间
+      // 获取命名空间 namespace，这个很重要，后期mybatis会通过这个动态代理我们的Mapper接口
       String namespace = context.getStringAttribute("namespace");
       if (namespace == null || namespace.equals("")) {
         throw new BuilderException("Mapper's namespace cannot be empty");
@@ -145,6 +148,12 @@ public class XMLMapperBuilder extends BaseBuilder {
        * 解析 <resultMap> 标签 {@link #resultMapElements(List)}
        */
       resultMapElements(context.evalNodes("/mapper/resultMap"));
+
+      /**
+       * 解析 SQL 部分
+       *
+       *  <sql id="staticSql">select * from test</sql>
+       */
       sqlElement(context.evalNodes("/mapper/sql"));
 
       /**
@@ -159,7 +168,9 @@ public class XMLMapperBuilder extends BaseBuilder {
   private void buildStatementFromContext(List<XNode> list) {
     if (configuration.getDatabaseId() != null) {
 
-      // 解析标签
+      /**
+       * 解析 xml 节点 {@link #buildStatementFromContext(List, String)}
+       */
       buildStatementFromContext(list, configuration.getDatabaseId());
     }
     buildStatementFromContext(list, null);
@@ -173,10 +184,12 @@ public class XMLMapperBuilder extends BaseBuilder {
       try {
 
         /**
-         * 核心解析 {@link XMLStatementBuilder#parseStatementNode()}
+         * 核心解析 XML 节点 {@link XMLStatementBuilder#parseStatementNode()}
          */
         statementParser.parseStatementNode();
       } catch (IncompleteElementException e) {
+
+        // xml语句有问题时 存储到集合中 等解析完能解析的再重新解析
         configuration.addIncompleteStatement(statementParser);
       }
     }

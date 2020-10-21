@@ -595,9 +595,15 @@ public class Configuration {
   }
 
   public ParameterHandler newParameterHandler(MappedStatement mappedStatement, Object parameterObject, BoundSql boundSql) {
+
+    /**
+     *  `创建 ParameterHandler 对象` {@link XMLLanguageDriver#createParameterHandler(MappedStatement, Object, BoundSql)}
+     */
     ParameterHandler parameterHandler = mappedStatement.getLang().createParameterHandler(mappedStatement, parameterObject, boundSql);
 
-    // 创建代理对象
+    /**
+     * 创建代理对象 {@link InterceptorChain#pluginAll(Object)}
+     */
     parameterHandler = (ParameterHandler) interceptorChain.pluginAll(parameterHandler);
     return parameterHandler;
   }

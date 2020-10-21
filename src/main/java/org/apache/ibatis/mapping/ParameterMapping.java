@@ -24,6 +24,8 @@ import org.apache.ibatis.type.TypeHandlerRegistry;
 
 /**
  * @author Clinton Begin
+ *
+ *  用于描述，MyBatis 参数映射信息。
  */
 public class ParameterMapping {
 

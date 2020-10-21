@@ -33,6 +33,10 @@ public class TransactionalCacheManager {
   }
 
   public Object getObject(Cache cache, CacheKey key) {
+
+    /**
+     * 获取二级缓存对应的 `TransactionalCache`, 然后根据缓存 Key 获取缓存对象。
+     */
     return getTransactionalCache(cache).getObject(key);
   }
 

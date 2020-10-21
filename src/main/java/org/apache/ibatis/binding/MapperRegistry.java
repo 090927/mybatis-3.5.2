@@ -86,11 +86,19 @@ public class MapperRegistry {
       }
       boolean loadCompleted = false;
       try {
+
+        // mapper 和 MapperProxyFactory 进行映射。
         knownMappers.put(type, new MapperProxyFactory<>(type));
         // It's important that the type is added before the parser is run
         // otherwise the binding may automatically be attempted by the
         // mapper parser. If the type is already known, it won't try.
+
+        // Mapper 注解构造器
         MapperAnnotationBuilder parser = new MapperAnnotationBuilder(config, type);
+
+        /**
+         * 解析 {@link MapperAnnotationBuilder#parse()}
+         */
         parser.parse();
         loadCompleted = true;
       } finally {

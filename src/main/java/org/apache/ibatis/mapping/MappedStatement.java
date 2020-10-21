@@ -31,7 +31,7 @@ import org.apache.ibatis.session.Configuration;
 /**
  * @author Clinton Begin
  *
- *  描述 Mapper SQL 配置信息。
+ *  包装 MyBatis配置信息及sql映射信息等。
  *   SQL 有两种方式，1: XML 2: 注解。
  */
 public final class MappedStatement {
@@ -305,6 +305,10 @@ public final class MappedStatement {
   }
 
   public BoundSql getBoundSql(Object parameterObject) {
+
+    /**
+     *  获取 BoundSql 对象 {@link org.apache.ibatis.scripting.xmltags.DynamicSqlSource#getBoundSql(Object)}
+     */
     BoundSql boundSql = sqlSource.getBoundSql(parameterObject);
     List<ParameterMapping> parameterMappings = boundSql.getParameterMappings();
     if (parameterMappings == null || parameterMappings.isEmpty()) {

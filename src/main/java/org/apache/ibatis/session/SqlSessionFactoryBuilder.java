@@ -74,6 +74,7 @@ public class SqlSessionFactoryBuilder {
 
   public SqlSessionFactory build(InputStream inputStream, String environment, Properties properties) {
     try {
+      // 构建 XmlConfigBuilder 构造者
       XMLConfigBuilder parser = new XMLConfigBuilder(inputStream, environment, properties);
 
       /**

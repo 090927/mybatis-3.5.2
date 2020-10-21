@@ -51,7 +51,7 @@ public interface LanguageDriver {
    * @param parameterType input parameter type got from a mapper method or specified in the parameterType xml attribute. Can be null.
    * @return
    *
-   *  创建 SqlSource 对象 （用于处理 XML 文件中配置的SQL 信息）
+   *  创建 SqlSource 对象 （用于处理 XML 文件中配置的SQL 信息）、将 SQL 配置转换为 SqlSource 对象。
    */
   SqlSource createSqlSource(Configuration configuration, XNode script, Class<?> parameterType);
 
@@ -64,7 +64,7 @@ public interface LanguageDriver {
    * @param parameterType input parameter type got from a mapper method or specified in the parameterType xml attribute. Can be null.
    * @return
    *
-   *  创建 SqlSource 对象 （用于处理 Java 注解中配置的 SQL 信息）
+   *  创建 SqlSource 对象 （用于处理 Java 注解中配置的 SQL 信息）将 SQL 配置转换为 SqlSource 对象。
    */
   SqlSource createSqlSource(Configuration configuration, String script, Class<?> parameterType);
 

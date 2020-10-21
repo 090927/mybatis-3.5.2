@@ -169,7 +169,7 @@ public abstract class BaseExecutor implements Executor {
       queryStack++;
 
       /**
-       * 从缓存中获取结果。【一级缓存，默认开启】
+       * 从缓存中获取结果。【TODO 一级缓存，默认开启】
        *  缓存 put 是在 `queryFromDatabase`。
        */
       list = resultHandler == null ? (List<E>) localCache.getObject(key) : null;
@@ -343,6 +343,8 @@ public abstract class BaseExecutor implements Executor {
 
   private void handleLocallyCachedOutputParameters(MappedStatement ms, CacheKey key, Object parameter, BoundSql boundSql) {
     if (ms.getStatementType() == StatementType.CALLABLE) {
+
+      // 获取缓存数据。
       final Object cachedParameter = localOutputParameterCache.getObject(key);
       if (cachedParameter != null && parameter != null) {
         final MetaObject metaCachedParameter = configuration.newMetaObject(cachedParameter);

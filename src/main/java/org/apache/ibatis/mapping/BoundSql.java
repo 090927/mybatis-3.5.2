@@ -32,6 +32,11 @@ import org.apache.ibatis.session.Configuration;
  * Can also have additional parameters that are created by the dynamic language (for loops, bind...).
  *
  * @author Clinton Begin
+ *
+ *  封装Mapper 解析后的SQL 语句、参数映射信息、传入的参数对象。
+ *
+ *   1、_parameter 代表整个参数，包括 <bind> 标签绑定的参数信息
+ *   2、_databaseId 为 Mapper 配置中通过 databaseId 属性指定的数据库类型。
  */
 public class BoundSql {
 

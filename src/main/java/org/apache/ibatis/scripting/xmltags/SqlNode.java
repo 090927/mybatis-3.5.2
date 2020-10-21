@@ -17,6 +17,8 @@ package org.apache.ibatis.scripting.xmltags;
 
 /**
  * @author Clinton Begin
+ *
+ *  用于描述 mapper Sql 配置的SQL 节点，是MyBatis 实现动态SQL的基石。
  */
 public interface SqlNode {
 

@@ -94,7 +94,9 @@ public class CachingExecutor implements Executor {
      */
     CacheKey key = createCacheKey(ms, parameterObject, rowBounds, boundSql);
 
-    // 核心查询
+    /**
+     * 核心查询 {@link #query(MappedStatement, Object, RowBounds, ResultHandler, CacheKey, BoundSql)}
+     */
     return query(ms, parameterObject, rowBounds, resultHandler, key, boundSql);
   }
 
@@ -120,8 +122,10 @@ public class CachingExecutor implements Executor {
         ensureNoOutParams(ms, boundSql);
         @SuppressWarnings("unchecked")
 
-          // 从 `MappedStatement` 对象，对应的二级缓存中获取数据。
-        List<E> list = (List<E>) tcm.getObject(cache, key);
+        /**
+         * 从 `MappedStatement` 对象，对应的二级缓存中获取数据。{@link TransactionalCacheManager#getObject(Cache, CacheKey)}
+         */
+          List<E> list = (List<E>) tcm.getObject(cache, key);
         if (list == null) {
 
           /**

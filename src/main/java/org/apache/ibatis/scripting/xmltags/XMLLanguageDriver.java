@@ -48,7 +48,7 @@ public class XMLLanguageDriver implements LanguageDriver {
   public SqlSource createSqlSource(Configuration configuration, XNode script, Class<?> parameterType) {
 
     /**
-     *  该方法用于解析 XML 文件中配置的 SQL 信息。创建XMLScriptBuilder 对象。
+     *  该方法用于解析 XML 文件中配置的 SQL 信息。创建XMLScriptBuilder 对象。{@link XMLScriptBuilder#XMLScriptBuilder(Configuration, XNode, Class)}
      */
     XMLScriptBuilder builder = new XMLScriptBuilder(configuration, script, parameterType);
 
@@ -58,6 +58,14 @@ public class XMLLanguageDriver implements LanguageDriver {
     return builder.parseScriptNode();
   }
 
+  /**
+   *  创建 sqlSource 对象 （用于处理 Java 注解中配置的 SQL 信息）
+   *
+   * @param configuration The MyBatis configuration
+   * @param script The content of the annotation
+   * @param parameterType input parameter type got from a mapper method or specified in the parameterType xml attribute. Can be null.
+   * @return
+   */
   @Override
   public SqlSource createSqlSource(Configuration configuration, String script, Class<?> parameterType) {
     // issue #3

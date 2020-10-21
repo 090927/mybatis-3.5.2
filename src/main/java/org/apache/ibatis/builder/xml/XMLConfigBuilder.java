@@ -82,6 +82,10 @@ public class XMLConfigBuilder extends BaseBuilder {
   }
 
   private XMLConfigBuilder(XPathParser parser, String environment, Properties props) {
+
+    /**
+     *  注册 TypeHandler {@link Configuration#Configuration()}
+     */
     super(new Configuration());
     ErrorContext.instance().resource("SQL Mapper Configuration");
     this.configuration.setVariables(props);
@@ -99,7 +103,7 @@ public class XMLConfigBuilder extends BaseBuilder {
     parsed = true;
 
     /**
-     * 对 XNode 进行处理。 {@link #parseConfiguration(XNode)}
+     * 解析 <configuration> 节点。 {@link #parseConfiguration(XNode)}
      */
     parseConfiguration(parser.evalNode("/configuration"));
     return configuration;
@@ -116,6 +120,10 @@ public class XMLConfigBuilder extends BaseBuilder {
       Properties settings = settingsAsProperties(root.evalNode("settings"));
       loadCustomVfs(settings);
       loadCustomLogImpl(settings);
+
+      /**
+       * <typeAliases> 别名解析 {@link #typeAliasesElement(XNode)}
+       */
       typeAliasesElement(root.evalNode("typeAliases"));
 
       /**
@@ -393,6 +401,8 @@ public class XMLConfigBuilder extends BaseBuilder {
    */
   private void mapperElement(XNode parent) throws Exception {
     if (parent != null) {
+
+      // 遍历解析 mappers 下的节点
       for (XNode child : parent.getChildren()) {
 
         // 通过 package 标签指定包。
@@ -400,6 +410,12 @@ public class XMLConfigBuilder extends BaseBuilder {
           String mapperPackage = child.getStringAttribute("name");
           configuration.addMappers(mapperPackage);
         } else {
+
+          /**
+           * 如果不存在 package 节点，那么扫描 mapper 节点。
+           *
+           *  resource、url、mapperClass 三个值是有值的
+           */
           String resource = child.getStringAttribute("resource");
           String url = child.getStringAttribute("url");
           String mapperClass = child.getStringAttribute("class");
@@ -427,7 +443,7 @@ public class XMLConfigBuilder extends BaseBuilder {
             mapperParser.parse();
           } else if (resource == null && url == null && mapperClass != null) {
 
-            // 通过 class 属性指定接口的完全限定名
+            // 通过类加载构造 configuration
             Class<?> mapperInterface = Resources.classForName(mapperClass);
 
             /**
@@ -435,6 +451,8 @@ public class XMLConfigBuilder extends BaseBuilder {
              */
             configuration.addMapper(mapperInterface);
           } else {
+
+            //
             throw new BuilderException("A mapper element may only specify a url, resource or class, but not more than one.");
           }
         }

@@ -44,7 +44,7 @@ public class DynamicSqlSource implements SqlSource {
     DynamicContext context = new DynamicContext(configuration, parameterObject);
 
     /**
-     * 调用 apply
+     *  对动态SQL 进行解析。
      */
     rootSqlNode.apply(context);
 
@@ -54,6 +54,8 @@ public class DynamicSqlSource implements SqlSource {
 
     /**
      * 对 SQL 内容进一步处理，生成 StaticSqlSource 对象 {@link SqlSourceBuilder#parse(String, Class, Map)}
+     *
+     *  1、获取动态 SQL 解析后的结果 {@link DynamicContext#getSql()}
      */
     SqlSource sqlSource = sqlSourceParser.parse(context.getSql(), parameterType, context.getBindings());
 
@@ -61,6 +63,10 @@ public class DynamicSqlSource implements SqlSource {
      * 获得 boundSql 实例 {@link DynamicSqlSource#getBoundSql(Object)}
      */
     BoundSql boundSql = sqlSource.getBoundSql(parameterObject);
+
+    /**
+     * 将 <bind> 标签绑定的参数添加到 BoundSql 对象中 {@link BoundSql#setAdditionalParameter(String, Object)}
+     */
     context.getBindings().forEach(boundSql::setAdditionalParameter);
     return boundSql;
   }

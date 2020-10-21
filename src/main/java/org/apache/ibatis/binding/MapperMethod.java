@@ -49,7 +49,10 @@ import org.apache.ibatis.session.SqlSession;
  */
 public class MapperMethod {
 
+  // sql 类型
   private final SqlCommand command;
+
+  // 获取方法的签名信息
   private final MethodSignature method;
 
   public MapperMethod(Class<?> mapperInterface, Method method, Configuration config) {

@@ -37,6 +37,8 @@ public class XMLScriptBuilder extends BaseBuilder {
   private final XNode context;
   private boolean isDynamic;
   private final Class<?> parameterType;
+
+  // 动态解析 Handler。
   private final Map<String, NodeHandler> nodeHandlerMap = new HashMap<>();
 
   public XMLScriptBuilder(Configuration configuration, XNode context) {
@@ -47,6 +49,10 @@ public class XMLScriptBuilder extends BaseBuilder {
     super(configuration);
     this.context = context;
     this.parameterType = parameterType;
+
+    /**
+     * 初始化，动态标签，解析Handler {@link #initNodeHandlerMap()}
+     */
     initNodeHandlerMap();
   }
 
@@ -80,8 +86,12 @@ public class XMLScriptBuilder extends BaseBuilder {
 
     // 判断 Mapper SQL 配置是否包含动态SQL 元素，如果是，就创建 `DynamicSqlSource` 对象。
     if (isDynamic) {
+
+      //如果是${}会直接不解析，等待执行的时候直接赋值
       sqlSource = new DynamicSqlSource(configuration, rootSqlNode);
     } else {
+
+      //用占位符方式来解析  #{} --> ?
       sqlSource = new RawSqlSource(configuration, rootSqlNode, parameterType);
     }
     return sqlSource;
@@ -95,6 +105,8 @@ public class XMLScriptBuilder extends BaseBuilder {
    */
   protected MixedSqlNode parseDynamicTags(XNode node) {
     List<SqlNode> contents = new ArrayList<>();
+
+    //获取select标签下的子标签
     NodeList children = node.getNode().getChildNodes();
 
     // 对 XML 子元素进行遍历。
@@ -108,11 +120,14 @@ public class XMLScriptBuilder extends BaseBuilder {
 
         // 若 SQL 文本中包含 ${} 参数占位符，则为动态SQL。
         if (textSqlNode.isDynamic()) {
+
+          //如果是${}那么直接不解析
           contents.add(textSqlNode);
           isDynamic = true;
         } else {
 
           // 如果 SQL 文本中，不包含 ${} 参数占位符，则不是 动态SQL。
+          //如果不是，则直接生成静态SQL
           contents.add(new StaticTextSqlNode(data));
         }
       } else if (child.getNode().getNodeType() == Node.ELEMENT_NODE) { // issue #628
@@ -128,6 +143,10 @@ public class XMLScriptBuilder extends BaseBuilder {
         if (handler == null) {
           throw new BuilderException("Unknown element <" + nodeName + "> in SQL statement.");
         }
+
+        /**
+         *  将动态SQL 标签，解析成 SqlNode 对象 {@link IfHandler#handleNode(XNode, List)}
+         */
         handler.handleNode(child, contents);
         isDynamic = true;
       }

@@ -57,29 +57,48 @@ public class XMLStatementBuilder extends BaseBuilder {
    * 解析 select | insert | delete | update 标签核心方法。
    */
   public void parseStatementNode() {
+
+    //获取<select id="xxx">中的id
     String id = context.getStringAttribute("id");
+
+    //获取databaseId 用于多数据库，这里为null
     String databaseId = context.getStringAttribute("databaseId");
 
     if (!databaseIdMatchesCurrent(id, databaseId, this.requiredDatabaseId)) {
       return;
     }
 
+    //获取节点名  select update delete insert
     String nodeName = context.getNode().getNodeName();
+
+    //根据节点名，得到SQL操作的类型
     SqlCommandType sqlCommandType = SqlCommandType.valueOf(nodeName.toUpperCase(Locale.ENGLISH));
+
+    //判断是否是查询
     boolean isSelect = sqlCommandType == SqlCommandType.SELECT;
 
-    // 解析 select | insert | delete | update 标签属性
+    //是否刷新缓存 默认:增删改刷新 查询不刷新
     boolean flushCache = context.getBooleanAttribute("flushCache", !isSelect);
+
+    //是否使用二级缓存 默认值:查询使用 增删改不使用
     boolean useCache = context.getBooleanAttribute("useCache", isSelect);
+
+    // 三组数据 分成一个嵌套的查询结果
     boolean resultOrdered = context.getBooleanAttribute("resultOrdered", false);
 
     // Include Fragments before parsing
 
     // 解析 <include> 标签内容替换为 <sql> 标签定义的SQL 片段。
     XMLIncludeTransformer includeParser = new XMLIncludeTransformer(configuration, builderAssistant);
+
+    //替换Includes标签为对应的sql标签里面的值
     includeParser.applyIncludes(context.getNode());
 
+
+    //获取parameterType名
     String parameterType = context.getStringAttribute("parameterType");
+
+    //获取parameterType的Class
     Class<?> parameterTypeClass = resolveClass(parameterType);
 
     // 获取 LanguageDriver 对象
@@ -103,10 +122,11 @@ public class XMLStatementBuilder extends BaseBuilder {
           ? Jdbc3KeyGenerator.INSTANCE : NoKeyGenerator.INSTANCE;
     }
 
+
+    /********************  解析 SQL **********************/
+
     /**
-     * 创建 SqlSource 对象 【动态SQL】
-     *
-     * {@link org.apache.ibatis.scripting.xmltags.XMLLanguageDriver#createSqlSource(Configuration, XNode, Class)}
+     * 创建 SqlSource 对象 【动态SQL】 {@link org.apache.ibatis.scripting.xmltags.XMLLanguageDriver#createSqlSource(Configuration, XNode, Class)}
      */
     SqlSource sqlSource = langDriver.createSqlSource(configuration, context, parameterTypeClass);
 
@@ -118,6 +138,8 @@ public class XMLStatementBuilder extends BaseBuilder {
     String resultType = context.getStringAttribute("resultType");
     Class<?> resultTypeClass = resolveClass(resultType);
     String resultMap = context.getStringAttribute("resultMap");
+
+    //获取结果集类型
     String resultSetType = context.getStringAttribute("resultSetType");
     ResultSetType resultSetTypeEnum = resolveResultSetType(resultSetType);
     if (resultSetTypeEnum == null) {
@@ -128,7 +150,7 @@ public class XMLStatementBuilder extends BaseBuilder {
     String resultSets = context.getStringAttribute("resultSets");
 
     /**
-     * 构建 MappedStatement {@link MapperBuilderAssistant#addMappedStatement(String, SqlSource, StatementType, SqlCommandType, Integer, Integer, String, Class, String, Class, ResultSetType, boolean, boolean, boolean, KeyGenerator, String, String, String, LanguageDriver, String)}
+     * 封装成 MappedStatement {@link MapperBuilderAssistant#addMappedStatement(String, SqlSource, StatementType, SqlCommandType, Integer, Integer, String, Class, String, Class, ResultSetType, boolean, boolean, boolean, KeyGenerator, String, String, String, LanguageDriver, String)}
      */
     builderAssistant.addMappedStatement(id, sqlSource, statementType, sqlCommandType,
         fetchSize, timeout, parameterMap, parameterTypeClass, resultMap, resultTypeClass,

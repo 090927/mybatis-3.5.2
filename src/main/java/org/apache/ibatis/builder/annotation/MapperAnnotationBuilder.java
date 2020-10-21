@@ -123,9 +123,23 @@ public class MapperAnnotationBuilder {
     this.type = type;
   }
 
+
+  /**
+   *  最终目的：
+   *    将 SQL、Mapper 方法等相关信息封装成一个 MapperStatement 添加到 Configuration 中。
+   *
+   *
+   * 注册：将 Mapper xml 中的节点信息和 Mapper 类中的注解信息与 Mapper 类的方法一一对应，
+   *    每个方法对应生成一个 MapperStatement，并添加到 Configuration 中；
+   *
+   * 绑定：根据 Mapper xml 中的 namespace 生成一个 Mapper class 对象，并与一个 MapperProxyFactory
+   *    代理工厂对应，用于 Mapper 代理对象的生成。
+   */
   public void parse() {
     String resource = type.toString();
     if (!configuration.isResourceLoaded(resource)) {
+
+      // 优先解析 xml 文件。
       loadXmlResource();
       configuration.addLoadedResource(resource);
       assistant.setCurrentNamespace(type.getName());
@@ -136,6 +150,10 @@ public class MapperAnnotationBuilder {
         try {
           // issue #237
           if (!method.isBridge()) {
+
+            /**
+             * 解析一个方法生成对应的  MapperStatement 对象。{@link #parseStatement(Method)}
+             */
             parseStatement(method);
           }
         } catch (IncompleteElementException e) {
@@ -298,7 +316,13 @@ public class MapperAnnotationBuilder {
 
   void parseStatement(Method method) {
     Class<?> parameterTypeClass = getParameterType(method);
+
+    // 加载注解。
     LanguageDriver languageDriver = getLanguageDriver(method);
+
+    /**
+     * 获取sql 资源。{@link #getSqlSourceFromAnnotations(Method, Class, LanguageDriver)}
+     */
     SqlSource sqlSource = getSqlSourceFromAnnotations(method, parameterTypeClass, languageDriver);
     if (sqlSource != null) {
       Options options = method.getAnnotation(Options.class);
@@ -355,6 +379,9 @@ public class MapperAnnotationBuilder {
         resultMapId = parseResultMap(method);
       }
 
+      /**
+       * 将 MappedStatement 添加到 Configuration 中
+       */
       assistant.addMappedStatement(
           mappedStatementId,
           sqlSource,
@@ -475,6 +502,10 @@ public class MapperAnnotationBuilder {
         }
         Annotation sqlAnnotation = method.getAnnotation(sqlAnnotationType);
         final String[] strings = (String[]) sqlAnnotation.getClass().getMethod("value").invoke(sqlAnnotation);
+
+        /**
+         * 获取 sqlSource {@link #buildSqlSourceFromStrings(String[], Class, LanguageDriver)}
+         */
         return buildSqlSourceFromStrings(strings, parameterType, languageDriver);
       } else if (sqlProviderAnnotationType != null) {
         Annotation sqlProviderAnnotation = method.getAnnotation(sqlProviderAnnotationType);
@@ -492,6 +523,10 @@ public class MapperAnnotationBuilder {
       sql.append(fragment);
       sql.append(" ");
     }
+
+    /**
+     * 创建 SqlSource 对象 (注解的方式) {@link org.apache.ibatis.scripting.xmltags.XMLLanguageDriver#createSqlSource(Configuration, String, Class)}
+     */
     return languageDriver.createSqlSource(configuration, sql.toString().trim(), parameterTypeClass);
   }
 
