@@ -56,6 +56,9 @@ public class Plugin implements InvocationHandler {
 
     /**
      * 获取 Intercepts 注解指定的要拦截的组件及方法 {@link #getSignatureMap(Interceptor)}
+     *
+     *  Key: Executor、ParameterHandler、ResultSetHandler、StatementHandler
+     *  Value: 所有方法对应的 Method 对象
      */
     Map<Class<?>, Set<Method>> signatureMap = getSignatureMap(interceptor);
     Class<?> type = target.getClass();
@@ -98,6 +101,12 @@ public class Plugin implements InvocationHandler {
     }
   }
 
+  /**
+   *  获取 interceptor 注解，要拦截的组件及方法。
+   *
+   * @param interceptor
+   * @return
+   */
   private static Map<Class<?>, Set<Method>> getSignatureMap(Interceptor interceptor) {
 
     // 获取 `Intercepts` 注解信息。

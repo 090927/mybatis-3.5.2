@@ -44,6 +44,11 @@ public class InterceptorChain {
     return target;
   }
 
+  /**
+   *
+   * 添加 Interceptor 拦截器。
+   * @param interceptor
+   */
   public void addInterceptor(Interceptor interceptor) {
     interceptors.add(interceptor);
   }

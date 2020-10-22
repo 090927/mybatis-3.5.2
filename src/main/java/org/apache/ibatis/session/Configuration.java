@@ -243,6 +243,10 @@ public class Configuration {
     return logImpl;
   }
 
+  /**
+   * 用户自定义 Log。
+   * @param logImpl
+   */
   public void setLogImpl(Class<? extends Log> logImpl) {
     if (logImpl != null) {
       this.logImpl = logImpl;
@@ -658,7 +662,9 @@ public class Configuration {
       executor = new CachingExecutor(executor);
     }
 
-    // 创建代理对象
+    /**
+     * 创建代理对象 {@link InterceptorChain#pluginAll(Object)}
+     */
     executor = (Executor) interceptorChain.pluginAll(executor);
     return executor;
   }

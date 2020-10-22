@@ -28,6 +28,7 @@ public final class LogFactory {
    */
   public static final String MARKER = "MYBATIS";
 
+  // 日志实现类的 Constructor 对象。
   private static Constructor<? extends Log> logConstructor;
 
   /**
@@ -79,6 +80,7 @@ public final class LogFactory {
     setImplementation(org.apache.ibatis.logging.log4j2.Log4j2Impl.class);
   }
 
+  // 使用 JUL 输出日志
   public static synchronized void useJdkLogging() {
     setImplementation(org.apache.ibatis.logging.jdk14.Jdk14LoggingImpl.class);
   }
@@ -117,6 +119,8 @@ public final class LogFactory {
       if (log.isDebugEnabled()) {
         log.debug("Logging initialized using '" + implClass + "' adapter.");
       }
+
+      // 记录当前使用的日志实现类的 Constructor 对象。
       logConstructor = candidate;
     } catch (Throwable t) {
       throw new LogException("Error setting Log implementation.  Cause: " + t, t);
