@@ -32,6 +32,8 @@ import org.apache.ibatis.session.SqlSession;
  * @author Lasse Voss
  *
  *  用于 Mapper 接口与 MapperProxyFactory 对象之间的对应关系。
+ *
+ *   1、MapperRegistry 类是一个 Mapper 类注册工厂。把MapperProxyFactory 映射过的 Mapper 类添加到它的属性 `knownMappers`
  */
 public class MapperRegistry {
 
@@ -87,7 +89,11 @@ public class MapperRegistry {
       boolean loadCompleted = false;
       try {
 
-        // mapper 和 MapperProxyFactory 进行映射。
+        /**
+         * mapper 和 MapperProxyFactory 进行映射。
+         *
+         *  【 注册 】
+         */
         knownMappers.put(type, new MapperProxyFactory<>(type));
         // It's important that the type is added before the parser is run
         // otherwise the binding may automatically be attempted by the

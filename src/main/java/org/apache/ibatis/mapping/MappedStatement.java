@@ -31,7 +31,7 @@ import org.apache.ibatis.session.Configuration;
 /**
  * @author Clinton Begin
  *
- *  包装 MyBatis配置信息及sql映射信息等。
+ *  包装 MyBatis配置信息及sql映射信息等。（每个方法对应一个 MappedStatement）
  *   SQL 有两种方式，1: XML 2: 注解。
  */
 public final class MappedStatement {
