@@ -73,7 +73,7 @@ public class SimpleStatementHandler extends BaseStatementHandler {
     String sql = boundSql.getSql();
 
     /**
-     * 调用
+     * 调用 {@link Statement#execute(String)}
      */
     statement.execute(sql);
 
