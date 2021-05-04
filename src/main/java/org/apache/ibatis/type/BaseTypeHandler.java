@@ -66,6 +66,10 @@ public abstract class BaseTypeHandler<T> extends TypeReference<T> implements Typ
       }
     } else {
       try {
+
+        /**
+         *  parameter 不为空，由子类具体实现 {@link #setNonNullParameter(PreparedStatement, int, Object, JdbcType)}
+         */
         setNonNullParameter(ps, i, parameter, jdbcType);
       } catch (Exception e) {
         throw new TypeException("Error setting non null for parameter #" + i + " with JdbcType " + jdbcType + " . "
@@ -78,6 +82,8 @@ public abstract class BaseTypeHandler<T> extends TypeReference<T> implements Typ
   @Override
   public T getResult(ResultSet rs, String columnName) throws SQLException {
     try {
+
+      // 抽象方法，由子类提供具体实现。
       return getNullableResult(rs, columnName);
     } catch (Exception e) {
       throw new ResultMapException("Error attempting to get column '" + columnName + "' from result set.  Cause: " + e, e);

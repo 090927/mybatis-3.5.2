@@ -15,6 +15,10 @@
  */
 package org.apache.ibatis.reflection;
 
+
+/**
+ * 为提升 `Reflector` 的初始化速度。
+ */
 public interface ReflectorFactory {
 
   boolean isClassCacheEnabled();

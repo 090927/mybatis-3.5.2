@@ -34,7 +34,10 @@ import org.apache.ibatis.reflection.wrapper.ObjectWrapperFactory;
  */
 public class MetaObject {
 
+  // 指向被封装的 JavaBean 对象。
   private final Object originalObject;
+
+  // 封装 对象的元信息
   private final ObjectWrapper objectWrapper;
   private final ObjectFactory objectFactory;
   private final ObjectWrapperFactory objectWrapperFactory;
@@ -46,6 +49,7 @@ public class MetaObject {
     this.objectWrapperFactory = objectWrapperFactory;
     this.reflectorFactory = reflectorFactory;
 
+    // 判断 object 类型
     if (object instanceof ObjectWrapper) {
       this.objectWrapper = (ObjectWrapper) object;
     } else if (objectWrapperFactory.hasWrapperFor(object)) {
@@ -111,6 +115,13 @@ public class MetaObject {
     return objectWrapper.hasGetter(name);
   }
 
+  /**
+   * 首先根据 `PropertyTokenizer` 解析指定的属性表达式，如果表达式是包含 "." 导航多级属性查询，
+   *  则获取子查询表达式并为其对应的属性对象创建关联 MaterObject 对象，继续递归调用 getValue()
+   *
+   * @param name
+   * @return
+   */
   public Object getValue(String name) {
     PropertyTokenizer prop = new PropertyTokenizer(name);
     if (prop.hasNext()) {

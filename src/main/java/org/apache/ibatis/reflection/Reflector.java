@@ -44,26 +44,47 @@ import org.apache.ibatis.reflection.property.PropertyNamer;
  * allows for easy mapping between property names and getter/setter methods.
  *
  * @author Clinton Begin
+ *
+ *  反射模块
  */
 public class Reflector {
 
   private final Class<?> type;
+
+  // 可读的属性名称集合
   private final String[] readablePropertyNames;
+
+  // 可写的属性名称集合
   private final String[] writablePropertyNames;
   private final Map<String, Invoker> setMethods = new HashMap<>();
   private final Map<String, Invoker> getMethods = new HashMap<>();
   private final Map<String, Class<?>> setTypes = new HashMap<>();
   private final Map<String, Class<?>> getTypes = new HashMap<>();
+
+  // 默认构造器
   private Constructor<?> defaultConstructor;
 
+  // 所有属性名称的集合，（都是大写）
   private Map<String, String> caseInsensitivePropertyMap = new HashMap<>();
 
   public Reflector(Class<?> clazz) {
     type = clazz;
+
+    /**
+     *  记录默认构造器 {@link #addDefaultConstructor(Class)}
+     */
     addDefaultConstructor(clazz);
+
+    /**
+     * 读取 Class 类中的 getter 方法 {@link #addGetMethods(Class)}
+     */
     addGetMethods(clazz);
+
+    // 读取 Class 类中 setter 方法。
     addSetMethods(clazz);
     addFields(clazz);
+
+    // 记录可读、可写，属性名称集合。
     readablePropertyNames = getMethods.keySet().toArray(new String[0]);
     writablePropertyNames = setMethods.keySet().toArray(new String[0]);
     for (String propName : readablePropertyNames) {
@@ -81,13 +102,26 @@ public class Reflector {
   }
 
   private void addGetMethods(Class<?> clazz) {
+
+    // key 为属性名称、value：该属性对应的 getter 方法集合
     Map<String, List<Method>> conflictingGetters = new HashMap<>();
+
+    /**
+     * 获取当前 Class 类的所有方法的（包含继承自父类以及接口的方法）{@link #getClassMethods(Class)}
+     */
     Method[] methods = getClassMethods(clazz);
     Arrays.stream(methods).filter(m -> m.getParameterTypes().length == 0 && PropertyNamer.isGetter(m.getName()))
       .forEach(m -> addMethodConflict(conflictingGetters, PropertyNamer.methodToProperty(m.getName()), m));
+
+    // 解决方法签名冲突。
     resolveGetterConflicts(conflictingGetters);
   }
 
+  /**
+   * 解决方法签名冲突
+   *  1、优先选择返回值为子类的 getter 方法。
+   * @param conflictingGetters
+   */
   private void resolveGetterConflicts(Map<String, List<Method>> conflictingGetters) {
     for (Entry<String, List<Method>> entry : conflictingGetters.entrySet()) {
       Method winner = null;
@@ -123,8 +157,18 @@ public class Reflector {
     }
   }
 
+  /**
+   *  getter 方法都会封装成 `MethodInvoker` 对象。
+   *
+   * @param name
+   * @param method
+   */
   private void addGetMethod(String name, Method method) {
     if (isValidPropertyName(name)) {
+
+      /**
+       * 封装成 MethodInvoker {@link MethodInvoker}
+       */
       getMethods.put(name, new MethodInvoker(method));
       Type returnType = TypeParameterResolver.resolveReturnType(method, type);
       getTypes.put(name, typeToClass(returnType));
@@ -270,6 +314,8 @@ public class Reflector {
    * @return An array containing all methods in this class
    */
   private Method[] getClassMethods(Class<?> clazz) {
+
+    // key 对应的方法签名、value 为方法对应的 Method。
     Map<String, Method> uniqueMethods = new HashMap<>();
     Class<?> currentClass = clazz;
     while (currentClass != null && currentClass != Object.class) {
@@ -440,6 +486,8 @@ public class Reflector {
   }
 
   public String findPropertyName(String name) {
+
+    // 都是以大写方式存储。
     return caseInsensitivePropertyMap.get(name.toUpperCase(Locale.ENGLISH));
   }
 }

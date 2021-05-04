@@ -28,6 +28,8 @@ import org.apache.ibatis.reflection.property.PropertyTokenizer;
 
 /**
  * @author Clinton Begin
+ *
+ *  封装了一个 JavaBean 对象之外，还封装了该 JavaBean 类型对应的 MetaClass 对象。
  */
 public class BeanWrapper extends BaseWrapper {
 
@@ -42,10 +44,22 @@ public class BeanWrapper extends BaseWrapper {
 
   @Override
   public Object get(PropertyTokenizer prop) {
+
+    // 判断表达式中是否含有数组下标。
     if (prop.getIndex() != null) {
+
+      /**
+       *  含有下标，通过 {@link #resolveCollection(PropertyTokenizer, Object)}
+       *   {@link #getCollectionValue(PropertyTokenizer, Object)} 从集合中获取相应元素。
+       */
       Object collection = resolveCollection(prop, object);
       return getCollectionValue(prop, collection);
     } else {
+
+      /**
+       * 不包含下标。{@link #getBeanProperty(PropertyTokenizer, Object)}
+       *  通过 MetaClass 查找属性名称在 {@link org.apache.ibatis.reflection.Reflector#getMethods}
+       */
       return getBeanProperty(prop, object);
     }
   }
@@ -161,6 +175,8 @@ public class BeanWrapper extends BaseWrapper {
     try {
       Invoker method = metaClass.getGetInvoker(prop.getName());
       try {
+
+        // 读取属性值。
         return method.invoke(object, NO_ARGUMENTS);
       } catch (Throwable t) {
         throw ExceptionUtil.unwrapThrowable(t);

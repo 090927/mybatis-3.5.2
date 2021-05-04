@@ -21,6 +21,8 @@ import org.apache.ibatis.reflection.Reflector;
 
 /**
  * @author Clinton Begin
+ *
+ *  一个属性拷贝的工具类。提供与 Spring 中 BeanUtils.copyProperties() 类似的功能
  */
 public final class PropertyCopier {
 

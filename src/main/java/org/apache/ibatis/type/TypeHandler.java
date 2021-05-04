@@ -24,16 +24,28 @@ import java.sql.SQLException;
  * @author Clinton Begin
  *
  *  类型处理器，用于处理 Java 类型与JDBC 类型之间的映射。
+ *   包括
+ *    1、PreparedStatement
+ *    2、ResultSet
  */
 public interface TypeHandler<T> {
 
-  // 为 PreparedStatement 对象设置参数。
+  /**
+   * 在通过 PreparedStatement 为 SQL 语句绑定参数时，会将传入的实例数据由 jdbcType 类型转换成 Java 类型
+   *
+   * @param ps
+   * @param i
+   * @param parameter
+   * @param jdbcType
+   * @throws SQLException
+   */
   void setParameter(PreparedStatement ps, int i, T parameter, JdbcType jdbcType) throws SQLException;
 
   /**
+   * 从 ResultSet 中获取数据时，会使用 getResult() 方法，其中会将读取的数据由 Java 类型转换成 JdbcType 类型
+   *
    * @param columnName Colunm name, when configuration <code>useColumnLabel</code> is <code>false</code>
    */
-  // 根据列名称获取该列的值
   T getResult(ResultSet rs, String columnName) throws SQLException;
 
   // 根据索引列获取该列的值

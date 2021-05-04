@@ -23,6 +23,10 @@ import org.apache.ibatis.reflection.property.PropertyTokenizer;
 
 /**
  * @author Clinton Begin
+ *
+ *  封装是对象元信息
+ *
+ *   实现对象的属性值、检测getter/setter 等基础功能。
  */
 public interface ObjectWrapper {
 

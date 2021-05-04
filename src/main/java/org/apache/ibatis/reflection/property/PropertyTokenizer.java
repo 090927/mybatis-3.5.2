@@ -19,6 +19,8 @@ import java.util.Iterator;
 
 /**
  * @author Clinton Begin
+ *
+ *  负责解析由 . 和[] 构成的表达式。
  */
 public class PropertyTokenizer implements Iterator<PropertyTokenizer> {
   private String name;
@@ -26,6 +28,11 @@ public class PropertyTokenizer implements Iterator<PropertyTokenizer> {
   private String index;
   private final String children;
 
+  /**
+   *  属性解析工具
+   *
+   * @param fullname
+   */
   public PropertyTokenizer(String fullname) {
     int delim = fullname.indexOf('.');
     if (delim > -1) {

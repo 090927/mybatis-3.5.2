@@ -35,6 +35,12 @@ public class DefaultReflectorFactory implements ReflectorFactory {
     this.classCacheEnabled = classCacheEnabled;
   }
 
+  /**
+   *  核心方法。
+   *
+   * @param type
+   * @return
+   */
   @Override
   public Reflector findForClass(Class<?> type) {
     if (classCacheEnabled) {

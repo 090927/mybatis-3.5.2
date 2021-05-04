@@ -53,6 +53,16 @@ public class DefaultObjectFactory implements ObjectFactory, Serializable {
     return (T) instantiateClass(classToCreate, constructorArgTypes, constructorArgs);
   }
 
+  /**
+   *
+   *  通过反射的方式，根据传入的参数列表，选择合适的 `构造函数` 实例化对象。
+   *
+   * @param type
+   * @param constructorArgTypes
+   * @param constructorArgs
+   * @param <T>
+   * @return
+   */
   private  <T> T instantiateClass(Class<T> type, List<Class<?>> constructorArgTypes, List<Object> constructorArgs) {
     try {
       Constructor<T> constructor;

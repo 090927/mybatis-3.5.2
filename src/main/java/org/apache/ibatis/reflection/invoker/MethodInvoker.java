@@ -22,6 +22,8 @@ import org.apache.ibatis.reflection.Reflector;
 
 /**
  * @author Clinton Begin
+ *
+ *  是通过反射方式，执行底层封装的 Method 方法，完成属性读写效果。
  */
 public class MethodInvoker implements Invoker {
 

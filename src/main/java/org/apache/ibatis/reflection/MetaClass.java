@@ -29,7 +29,10 @@ import org.apache.ibatis.reflection.property.PropertyTokenizer;
 /**
  * @author Clinton Begin
  *
+ *  【 封装 Class 元信息 】
+ *
  *  反射工具类，用来获取类相关的信息。
+ *    底层依赖 `Reflector`
  */
 public class MetaClass {
 
@@ -38,6 +41,10 @@ public class MetaClass {
 
   private MetaClass(Class<?> type, ReflectorFactory reflectorFactory) {
     this.reflectorFactory = reflectorFactory;
+
+    /**
+     * findForClass {@link DefaultReflectorFactory#findForClass(Class)}
+     */
     this.reflector = reflectorFactory.findForClass(type);
   }
 
@@ -50,7 +57,26 @@ public class MetaClass {
     return MetaClass.forClass(propType, reflectorFactory);
   }
 
+  /**
+   *
+   * 实现属性查找的核心方法。
+   *  主要处理, "." 导航的属性查找。
+   *
+   *   例如: order.deliveryAddress.customer.name
+   *
+   *   1、逐层处理表达式。通过 order 找到对应 Reflector 查找 “deliveryAddress”
+   *   属性，查找成功后，
+   *   2、根据 deliveryAddress 属性，在继续查找其中 “customer”
+   *   3、如此递归处理。
+   *
+   * @param name
+   * @return
+   */
   public String findProperty(String name) {
+
+    /**
+     * 递归处理 {@link #buildProperty(String, StringBuilder)}
+     */
     StringBuilder prop = buildProperty(name, new StringBuilder());
     return prop.length() > 0 ? prop.toString() : null;
   }
@@ -170,8 +196,14 @@ public class MetaClass {
   }
 
   private StringBuilder buildProperty(String name, StringBuilder builder) {
+
+    // 使用 `PropertyTokenizer` 工具类
     PropertyTokenizer prop = new PropertyTokenizer(name);
     if (prop.hasNext()) {
+
+      /**
+       * 依赖 `reflector`  {@link Reflector#findPropertyName(String)}
+       */
       String propertyName = reflector.findPropertyName(prop.getName());
       if (propertyName != null) {
         builder.append(propertyName);
