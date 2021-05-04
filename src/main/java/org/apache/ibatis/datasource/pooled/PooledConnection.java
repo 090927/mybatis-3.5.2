@@ -25,6 +25,8 @@ import org.apache.ibatis.reflection.ExceptionUtil;
 
 /**
  * @author Clinton Begin
+ *
+ *  封装真正的 Connection 对象以及相关的代理对象
  */
 class PooledConnection implements InvocationHandler {
 
@@ -32,13 +34,29 @@ class PooledConnection implements InvocationHandler {
   private static final Class<?>[] IFACES = new Class<?>[] { Connection.class };
 
   private final int hashCode;
+
+  // 记录当前 PooledConnection 对象归属的 PooledDataSource 对象
   private final PooledDataSource dataSource;
+
+  // PooledConnection 底层的真正数据库连接对象
   private final Connection realConnection;
+
+  // realConnection 数据库连接的代理对象
   private final Connection proxyConnection;
+
+  // 使用方从连接池中获取的时间戳
   private long checkoutTimestamp;
+
+  // 连接创建的时间戳
   private long createdTimestamp;
+
+  // 连接最后一次被使用的时间戳
   private long lastUsedTimestamp;
+
+  // 数据库连接的标识
   private int connectionTypeCode;
+
+  // 用于标识 PooledConnection 对象是否有效
   private boolean valid;
 
   /**
@@ -233,6 +251,10 @@ class PooledConnection implements InvocationHandler {
   public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
     String methodName = method.getName();
     if (CLOSE.hashCode() == methodName.hashCode() && CLOSE.equals(methodName)) {
+
+      /**
+       * 如果调用 close() 方法，并没有直接关闭底层链接，而是将其归还给关联的连接池。{@link PooledDataSource#pushConnection(PooledConnection)}
+       */
       dataSource.pushConnection(this);
       return null;
     }
@@ -240,8 +262,14 @@ class PooledConnection implements InvocationHandler {
       if (!Object.class.equals(method.getDeclaringClass())) {
         // issue #579 toString() should never fail
         // throw an SQLException instead of a Runtime
+
+        /**
+         *  检测当前 pooledConnection 是否可用  `valid` 属性
+         */
         checkConnection();
       }
+
+      // 调用 realConnection 的对应方法。
       return method.invoke(realConnection, args);
     } catch (Throwable t) {
       throw ExceptionUtil.unwrapThrowable(t);

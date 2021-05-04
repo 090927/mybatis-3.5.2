@@ -38,6 +38,11 @@ public class UnpooledDataSourceFactory implements DataSourceFactory {
     this.dataSource = new UnpooledDataSource();
   }
 
+  /**
+   * 根据传入的配置信息，完成对该 UnpooledDataSource 对象相关属性的设置。
+   *
+   * @param properties
+   */
   @Override
   public void setProperties(Properties properties) {
     Properties driverProperties = new Properties();

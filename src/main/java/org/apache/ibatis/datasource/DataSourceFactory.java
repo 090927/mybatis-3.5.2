@@ -25,6 +25,7 @@ public interface DataSourceFactory {
 
   void setProperties(Properties props);
 
+  // 生成一个 DataSource
   DataSource getDataSource();
 
 }

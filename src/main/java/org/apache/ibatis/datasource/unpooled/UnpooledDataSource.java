@@ -38,8 +38,13 @@ import org.apache.ibatis.io.Resources;
  */
 public class UnpooledDataSource implements DataSource {
 
+  // 加载 Driver 类的 类加载器。
   private ClassLoader driverClassLoader;
+
+  // 数据库连接驱动的相关配置
   private Properties driverProperties;
+
+  // 缓存所有已注册的数据库连接驱动
   private static Map<String, Driver> registeredDrivers = new ConcurrentHashMap<>();
 
   private String driver;
@@ -48,13 +53,19 @@ public class UnpooledDataSource implements DataSource {
   private String password;
 
   private Boolean autoCommit;
+
+  // 事务隔离级别。
   private Integer defaultTransactionIsolationLevel;
   private Integer defaultNetworkTimeout;
 
   static {
+
+    // 从 DriverManager 中读取 JDBC 驱动
     Enumeration<Driver> drivers = DriverManager.getDrivers();
     while (drivers.hasMoreElements()) {
       Driver driver = drivers.nextElement();
+
+      // 将 DriverManager 中的全部JDBC 驱动记录 registeredDrivers 集合
       registeredDrivers.put(driver.getClass().getName(), driver);
     }
   }
@@ -193,7 +204,7 @@ public class UnpooledDataSource implements DataSource {
 
   /**
    * Sets the default network timeout value to wait for the database operation to complete. See {@link Connection#setNetworkTimeout(java.util.concurrent.Executor, int)}
-   * 
+   *
    * @param defaultNetworkTimeout
    *          The time in milliseconds to wait for the database operation to complete.
    * @since 3.5.2
@@ -217,8 +228,15 @@ public class UnpooledDataSource implements DataSource {
   }
 
   private Connection doGetConnection(Properties properties) throws SQLException {
+    // 初始化 数据库驱动
     initializeDriver();
+
+    // 创建数据库连接
     Connection connection = DriverManager.getConnection(url, properties);
+
+    /**
+     * 配置数据库连接  {@link #configureConnection(Connection)}
+     */
     configureConnection(connection);
     return connection;
   }
@@ -243,6 +261,14 @@ public class UnpooledDataSource implements DataSource {
     }
   }
 
+  /**
+   *  数据库连接超时时长、
+   *  事务是否自动提交、
+   *  事务隔离级别
+   *
+   * @param conn
+   * @throws SQLException
+   */
   private void configureConnection(Connection conn) throws SQLException {
     if (defaultNetworkTimeout != null) {
       conn.setNetworkTimeout(Executors.newSingleThreadExecutor(), defaultNetworkTimeout);

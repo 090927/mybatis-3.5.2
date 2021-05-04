@@ -31,6 +31,8 @@ import org.apache.ibatis.reflection.ExceptionUtil;
  * @author Clinton Begin
  * @author Eduardo Macarron
  *
+ *  会为 prepareStatement、prepareCall、createStatement 三个方法添加代理逻辑。
+ *
  */
 public final class ConnectionLogger extends BaseJdbcLogger implements InvocationHandler {
 
@@ -46,13 +48,25 @@ public final class ConnectionLogger extends BaseJdbcLogger implements Invocation
       throws Throwable {
     try {
       if (Object.class.equals(method.getDeclaringClass())) {
+
+        // 如果调用 从 Object 继承的方法，则直接调用，不做任何拦截
         return method.invoke(this, params);
       }
+
+      /**
+       *  调用 `prepareStatement` 方法 `prepareCall` 方法
+       *  会在创建 prepareStatement 对象之后，用 prepareStatementLogger 为其创建代理对象
+       *
+       */
       if ("prepareStatement".equals(method.getName())) {
         if (isDebugEnabled()) {
           debug(" Preparing: " + removeBreakingWhitespace((String) params[0]), true);
         }
         PreparedStatement stmt = (PreparedStatement) method.invoke(connection, params);
+
+        /**
+         *  代理方式处理 {@link PreparedStatementLogger#newInstance(PreparedStatement, Log, int)}
+         */
         stmt = PreparedStatementLogger.newInstance(stmt, statementLog, queryStack);
         return stmt;
       } else if ("prepareCall".equals(method.getName())) {
@@ -60,10 +74,22 @@ public final class ConnectionLogger extends BaseJdbcLogger implements Invocation
           debug(" Preparing: " + removeBreakingWhitespace((String) params[0]), true);
         }
         PreparedStatement stmt = (PreparedStatement) method.invoke(connection, params);
+
+        /**
+         * 代理方式处理，{@link PreparedStatementLogger#newInstance(PreparedStatement, Log, int)}
+         */
         stmt = PreparedStatementLogger.newInstance(stmt, statementLog, queryStack);
         return stmt;
+
+        /**
+         * createStatement 用 StatementLogger 为其创建代理对象
+         */
       } else if ("createStatement".equals(method.getName())) {
         Statement stmt = (Statement) method.invoke(connection, params);
+
+        /**
+         * 代理方式处理 {@link StatementLogger#newInstance(Statement, Log, int)}
+         */
         stmt = StatementLogger.newInstance(stmt, statementLog, queryStack);
         return stmt;
       } else {

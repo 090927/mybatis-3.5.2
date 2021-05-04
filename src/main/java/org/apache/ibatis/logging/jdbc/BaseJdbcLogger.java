@@ -64,12 +64,16 @@ public abstract class BaseJdbcLogger {
   }
 
   static {
+
+
+    // 用于记录绑定 SQL 参数涉及的全部 set(*) 方法名称
     SET_METHODS = Arrays.stream(PreparedStatement.class.getDeclaredMethods())
             .filter(method -> method.getName().startsWith("set"))
             .filter(method -> method.getParameterCount() > 1)
             .map(Method::getName)
             .collect(Collectors.toSet());
 
+    // 用于记录执行 SQL 语句涉及的所有方法名称。
     EXECUTE_METHODS.add("execute");
     EXECUTE_METHODS.add("executeUpdate");
     EXECUTE_METHODS.add("executeQuery");

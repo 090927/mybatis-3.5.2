@@ -20,6 +20,8 @@ import java.lang.reflect.Constructor;
 /**
  * @author Clinton Begin
  * @author Eduardo Macarron
+ *
+ *  负责 Log 对象
  */
 public final class LogFactory {
 
@@ -32,13 +34,15 @@ public final class LogFactory {
   private static Constructor<? extends Log> logConstructor;
 
   /**
-   * 未指定日志框架，系统查找日志框架顺序。
+   * 未指定日志框架，系统查找 “日志框架顺序”，进行加载。
    */
   static {
     tryImplementation(LogFactory::useSlf4jLogging);
     tryImplementation(LogFactory::useCommonsLogging);
     tryImplementation(LogFactory::useLog4J2Logging);
     tryImplementation(LogFactory::useLog4JLogging);
+
+    // JDK Logging 加载流程
     tryImplementation(LogFactory::useJdkLogging);
     tryImplementation(LogFactory::useNoLogging);
   }
@@ -99,6 +103,7 @@ public final class LogFactory {
    * @param runnable
    */
   private static void tryImplementation(Runnable runnable) {
+    // 判断 logConstructor （加载成功，则不为空）
     if (logConstructor == null) {
       try {
         runnable.run();
@@ -111,16 +116,16 @@ public final class LogFactory {
   private static void setImplementation(Class<? extends Log> implClass) {
     try {
 
-      // 获取日志的实现类
+      // 获取 implClass 这个适配器的构造方法
       Constructor<? extends Log> candidate = implClass.getConstructor(String.class);
 
-      // 根据日志实现类，创建 log 实例。
+      // 尝试加载 implClass 这个适配器，加载失败会抛出异常
       Log log = candidate.newInstance(LogFactory.class.getName());
       if (log.isDebugEnabled()) {
         log.debug("Logging initialized using '" + implClass + "' adapter.");
       }
 
-      // 记录当前使用的日志实现类的 Constructor 对象。
+      // “加载成功” 记录当前使用的日志实现类的 Constructor 对象。
       logConstructor = candidate;
     } catch (Throwable t) {
       throw new LogException("Error setting Log implementation.  Cause: " + t, t);

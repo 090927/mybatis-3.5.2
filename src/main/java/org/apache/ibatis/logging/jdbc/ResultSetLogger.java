@@ -67,16 +67,28 @@ public final class ResultSetLogger extends BaseJdbcLogger implements InvocationH
         return method.invoke(this, params);
       }
       Object o = method.invoke(rs, params);
+
+      // 针对 ResultSet.next 方法进行后置处理
       if ("next".equals(method.getName())) {
         if ((Boolean) o) {
           rows++;
+
+          // 记录 ResultSet 中的行数
           if (isTraceEnabled()) {
+
+            // 获取数据集中列元数据
             ResultSetMetaData rsmd = rs.getMetaData();
+
+            // 获取数据集的列数
             final int columnCount = rsmd.getColumnCount();
             if (first) {
               first = false;
+
+              // 除了输出表头，还会记录 BLOB 等超大类型列名
               printColumnHeaders(rsmd, columnCount);
             }
+
+            // 会过滤掉超大类型列的数据。不进行输出
             printColumnValues(columnCount);
           }
         } else {

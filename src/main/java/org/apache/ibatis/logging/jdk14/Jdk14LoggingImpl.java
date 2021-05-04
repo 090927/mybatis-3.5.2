@@ -22,12 +22,15 @@ import org.apache.ibatis.logging.Log;
 
 /**
  * @author Clinton Begin
+ *
+ *  适配器模式，实现 MyBatis Log 接口的同时，在内部还封装了 `Logger` 对象（JDK 提供的日志框架）
  */
 public class Jdk14LoggingImpl implements Log {
 
   private final Logger log;
 
   public Jdk14LoggingImpl(String clazz) {
+    // 初始化 log 字段
     log = Logger.getLogger(clazz);
   }
 
@@ -43,6 +46,7 @@ public class Jdk14LoggingImpl implements Log {
 
   @Override
   public void error(String s, Throwable e) {
+    // 全部调用依赖 java.util.logging.Logger 对象进行实现
     log.log(Level.SEVERE, s, e);
   }
 

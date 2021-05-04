@@ -21,6 +21,22 @@
 - TypeHandlerRegistry 管理 `TypeHandler`.
 - TypeAliasRegistry 维护别名配置的核心
 
+##### 代理 (使用 JDK 动态代理) 实现日志功能 
+- `BaseJdbcLogger` （抽象类）
+  - 对获取 Connection
+  - PreparedStatement
+  - Statement
+  - ResultSet 进行拦截
 
-#### 日志 log 
-> 采用工厂方法，`LogFactory` 
+##### 数据源（DataSource）
+- `DataSourceFactory` （工厂模式）进行创建
+- `PooledConnection` 是 Mybatis 中定义一个 InvocationHandler 接口实现（封装真正 Connection 对象以及相关代理对象）
+- `PoolState` 负责管理连接池中所有 PooledConnection 对象的状态，
+
+#### 日志 log （采用适配器模式）
+- Log 接口
+- 采用工厂方法，`LogFactory` （负责创建 Log 对象）
+  - 静态代码块，首先会检测 `logConstuctor` 字段是否为空，
+      - 如果不为空，则表示已经成功确定当前使用的日志框架，直接返回。
+      - 如果为空，则在当前线程中执行传入 `Runnalbe.run()` 尝试确定当前使用的日志框架
+  
