@@ -37,6 +37,8 @@ import java.util.concurrent.locks.ReadWriteLock;
  * </pre>
  *
  * @author Clinton Begin
+ *
+ *  缓存
  */
 
 public interface Cache {
@@ -59,6 +61,8 @@ public interface Cache {
   /**
    * @param key The key
    * @return The object stored in the cache.
+   *
+   *  查询缓存
    */
   Object getObject(Object key);
 
@@ -75,6 +79,8 @@ public interface Cache {
    *
    * @param key The key
    * @return Not used
+   *
+   *  删除缓存
    */
   Object removeObject(Object key);
 

@@ -31,16 +31,16 @@ import org.apache.ibatis.session.SqlSession;
  * @author Eduardo Macarron
  * @author Lasse Voss
  *
- *  用于 Mapper 接口与 MapperProxyFactory 对象之间的对应关系。
+ *  用于 Mapper 接口与 MapperProxyFactory（Mapper 的代理对象工厂） 之间的对应关系。
  *
  *   1、MapperRegistry 类是一个 Mapper 类注册工厂。把MapperProxyFactory 映射过的 Mapper 类添加到它的属性 `knownMappers`
  */
 public class MapperRegistry {
 
-  // configuration 对象引用
+  // 指向 MyBatis 全局唯一 Configuration 对象，（其中维护了解析之后的全部 MyBatis 配置信息）
   private final Configuration config;
 
-  // 用于注册 Mapper 接口对应 Class对象，和 MapperProxyFactory 对象对应关系
+  // 维护了所有解析到的 Mapper 接口对应 Class对象，和 MapperProxyFactory 工厂对象之间的映射关系
   private final Map<Class<?>, MapperProxyFactory<?>> knownMappers = new HashMap<>();
 
   public MapperRegistry(Configuration config) {
@@ -63,7 +63,7 @@ public class MapperRegistry {
     try {
 
       /**
-       * {@link MapperProxyFactory#newInstance(SqlSession)}
+       *  “newInstance” {@link MapperProxyFactory#newInstance(SqlSession)}
        */
       return mapperProxyFactory.newInstance(sqlSession);
     } catch (Exception e) {
@@ -77,11 +77,15 @@ public class MapperRegistry {
 
 
   /**
+   *  【MyBatis 初始化】会读取全部 Mapper.xml 配置文件，还会扫描全部 Mapper 接口中注解信息，
+   *
    * 根据 Mapper 接口 Class 对象创建 MapperProxyFactory 对象，并注册 knownMappers
    * @param type
    * @param <T>
    */
   public <T> void addMapper(Class<T> type) {
+
+    // 是否是一个接口，且 knownMappers 集合没有加载过 type 类型。
     if (type.isInterface()) {
       if (hasMapper(type)) {
         throw new BindingException("Type " + type + " is already known to the MapperRegistry.");
@@ -91,8 +95,6 @@ public class MapperRegistry {
 
         /**
          * mapper 和 MapperProxyFactory 进行映射。
-         *
-         *  【 注册 】
          */
         knownMappers.put(type, new MapperProxyFactory<>(type));
         // It's important that the type is added before the parser is run
@@ -108,6 +110,8 @@ public class MapperRegistry {
         parser.parse();
         loadCompleted = true;
       } finally {
+
+        // 解析失败
         if (!loadCompleted) {
           knownMappers.remove(type);
         }

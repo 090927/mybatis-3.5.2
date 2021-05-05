@@ -68,6 +68,10 @@ public class BlockingCache implements Cache {
 
   @Override
   public Object getObject(Object key) {
+
+    /**
+     * 获取锁{@link #acquireLock(Object)}
+     */
     acquireLock(key);
     Object value = delegate.getObject(key);
     if (value != null) {
@@ -93,10 +97,17 @@ public class BlockingCache implements Cache {
   }
 
   private void acquireLock(Object key) {
+
+    /**
+     *  从 `locks` 中获取锁
+     */
     Lock lock = getLockForKey(key);
     if (timeout > 0) {
       try {
+        // 根据 timeout 的值，决定则塞超时时间
         boolean acquired = lock.tryLock(timeout, TimeUnit.MILLISECONDS);
+
+        // 超时未获取到锁，则抛出异常。
         if (!acquired) {
           throw new CacheException("Couldn't get a lock in " + timeout + " for the key " +  key + " at the cache " + delegate.getId());
         }

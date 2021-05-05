@@ -24,6 +24,8 @@ import org.apache.ibatis.cache.Cache;
  * FIFO (first in, first out) cache decorator.
  *
  * @author Clinton Begin
+ *
+ *  先入先出 策略。
  */
 public class FifoCache implements Cache {
 
@@ -53,6 +55,8 @@ public class FifoCache implements Cache {
 
   @Override
   public void putObject(Object key, Object value) {
+
+    // 执行 FIFO 策略清理缓存。
     cycleKeyList(key);
     delegate.putObject(key, value);
   }

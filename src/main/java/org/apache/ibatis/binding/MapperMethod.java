@@ -52,13 +52,15 @@ public class MapperMethod {
   // sql 类型
   private final SqlCommand command;
 
-  // 获取方法的签名信息
+  // 获取方法的签名信息（维护 Mapper 接口中方法的相关信息）
   private final MethodSignature method;
 
   public MapperMethod(Class<?> mapperInterface, Method method, Configuration config) {
 
     /**
      *  获取SQL 语句的类型和 Mapper的 ID 等信息 {@link SqlCommand#SqlCommand(Configuration, Class, Method)}
+     *    1、Mapper 如果方法就定义在当前接口中，则证明没有对应的SQL,"抛出异常"。
+     *
      *  获取方法的签名信息。 {@link MethodSignature#MethodSignature(Configuration, Class, Method)}
      *    1、例如 Mapper 方法的参数名、参数注解。
      */
@@ -66,6 +68,13 @@ public class MapperMethod {
     this.method = new MethodSignature(config, mapperInterface, method);
   }
 
+  /**
+   *  根据要执行的 SQL 语句的具体类型执行 SQLSession 的相应的方法完成数据库操作。
+   *
+   * @param sqlSession
+   * @param args
+   * @return
+   */
   public Object execute(SqlSession sqlSession, Object[] args) {
     Object result;
 
@@ -73,7 +82,9 @@ public class MapperMethod {
     switch (command.getType()) {
       case INSERT: {
 
-        // 提取参数信息。
+        /**
+         * 提取参数信息。{@link ParamNameResolver#getNamedParams(Object[])}
+         */
         Object param = method.convertArgsToSqlCommandParam(args);
 
         /**
@@ -96,6 +107,11 @@ public class MapperMethod {
       }
       case SELECT:
         if (method.returnsVoid() && method.hasResultHandler()) {
+
+          /**
+           *  如果方法返回值 为 void，且参数中包含 ResultHandler 类型的实参，
+           *  则查询的结果集，将会由 ResultHandler 对象进行处理 {@link #executeWithResultHandler(SqlSession, Object[])}
+           */
           executeWithResultHandler(sqlSession, args);
           result = null;
         } else if (method.returnsMany()) {
@@ -249,33 +265,47 @@ public class MapperMethod {
    */
   public static class SqlCommand {
 
-    // MapperId
+    // MapperId（唯一标识）
     private final String name;
 
     // SQL 类型
     private final SqlCommandType type;
 
     public SqlCommand(Configuration configuration, Class<?> mapperInterface, Method method) {
+
+      // 获取 Mapper 接口中对应的 方法名称
       final String methodName = method.getName();
 
       // 获取声明该方法的类或接口的 Class对象。
       final Class<?> declaringClass = method.getDeclaringClass();
 
       /**
+       *  将 Mapper 接口名称 和方法名拼接起来作为 SQL 语句唯一标识
+       *  到 configuration 这个全局配置对象中查找 SQL 语句
+       *  mappedStatement 对象就是 mapper.xml 配置文件一条 SQL 语句解析之后得到对象。
+       *
        *  描述 Mapper SQL 配置信息 {@link #resolveMappedStatement(Class, String, Class, Configuration)}
        */
       MappedStatement ms = resolveMappedStatement(mapperInterface, methodName, declaringClass,
           configuration);
       if (ms == null) {
+
+        // 针对 @Flush 注解的处理。
         if (method.getAnnotation(Flush.class) != null) {
           name = null;
           type = SqlCommandType.FLUSH;
         } else {
+
+          // mapper 接口，没找到对应 mapper.xml 则抛出异常。
           throw new BindingException("Invalid bound statement (not found): "
               + mapperInterface.getName() + "." + methodName);
         }
       } else {
+
+        // 记录SQL 语句的唯一标识。
         name = ms.getId();
+
+        // 记录SQL 语句的操作类型。
         type = ms.getSqlCommandType();
         if (type == SqlCommandType.UNKNOWN) {
           throw new BindingException("Unknown execution method for: " + name);
@@ -309,10 +339,17 @@ public class MapperMethod {
         // 如果 Configuration 对象已注册 MappedStatement 对象，则获取 `MappedStatement` 对象。
         return configuration.getMappedStatement(statementId);
       } else if (mapperInterface.equals(declaringClass)) {
+
+        // 如果方法就定义在当前接口中，则证明没有对应的SQL 语句，返回null。
         return null;
       }
 
-      // 如果 方法是在 Mapper 父接口中定义，则从父接口中获取 `MappedStatement` 对象。
+      /**
+       *
+       * 如果当前检查的Mapper接口(mapperInterface)中不是定义该方法的接口(declaringClass)，
+       * 则会从mapperInterface开始，沿着继承关系向上查找递归每个接口，
+       * 查找该方法对应的 MappedStatement 对象。
+       */
       for (Class<?> superInterface : mapperInterface.getInterfaces()) {
         if (declaringClass.isAssignableFrom(superInterface)) {
           MappedStatement ms = resolveMappedStatement(superInterface, methodName,
@@ -337,10 +374,20 @@ public class MapperMethod {
     private final boolean returnsVoid;
     private final boolean returnsCursor;
     private final boolean returnsOptional;
+
+    // 方法返回的具体类型
     private final Class<?> returnType;
+
+    // 如果方法的返回值为 Map 集合，则 mapkey 字段记录作为 key 的列名。
     private final String mapKey;
+
+    // Mapper 接口方法的参数列表中 ResultHandler 类型
     private final Integer resultHandlerIndex;
+
+    // Mapper 接口方法参数列表，RowBounds 类型
     private final Integer rowBoundsIndex;
+
+    // 用来解析方法参数列表工具类
     private final ParamNameResolver paramNameResolver;
 
     public MethodSignature(Configuration configuration, Class<?> mapperInterface, Method method) {

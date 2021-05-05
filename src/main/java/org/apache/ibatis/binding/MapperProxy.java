@@ -30,13 +30,19 @@ import org.apache.ibatis.session.SqlSession;
  * @author Clinton Begin
  * @author Eduardo Macarron
  *
- *  Mybatis 使用 MapperProxy 实现动态代理。
+ *  MapperProxy 是生成 Mapper 接口代理对象的关键。
  */
 public class MapperProxy<T> implements InvocationHandler, Serializable {
 
   private static final long serialVersionUID = -6424540398559729838L;
+
+  // 记录当前 MapperProxy 管理的 sqlSession 对象。
   private final SqlSession sqlSession;
+
+  // Mapper 接口类型（也是当前 MapperProxy 关联的代理对象实现的接口类型）
   private final Class<T> mapperInterface;
+
+  // 用于缓存，MapperMethodInvoker 对象的集合，key: 是Mapper 接口中的方法，value: 对应 MapperMetrhodInvoker 对象。
   private final Map<Method, MapperMethod> methodCache;
 
   public MapperProxy(SqlSession sqlSession, Class<T> mapperInterface, Map<Method, MapperMethod> methodCache) {
@@ -53,6 +59,10 @@ public class MapperProxy<T> implements InvocationHandler, Serializable {
       if (Object.class.equals(method.getDeclaringClass())) {
         return method.invoke(this, args);
       } else if (method.isDefault()) {
+
+        /**
+         *  “invokeDefaultMethod” {@link #invokeDefaultMethod(Object, Method, Object[])}
+         */
         return invokeDefaultMethod(proxy, method, args);
       }
     } catch (Throwable t) {
@@ -81,6 +91,19 @@ public class MapperProxy<T> implements InvocationHandler, Serializable {
     return methodCache.computeIfAbsent(method, k -> new MapperMethod(mapperInterface, method, sqlSession.getConfiguration()));
   }
 
+
+  /**
+   *  MethodHandle 基本功能与 反射 Method 类似，但它比反射更加灵活。
+   *    反射是 JAVA API 层面支持的一种机制。
+   *    MethodHandle 则是 JVM 层支持的机制，相较而言，反射更加重量级。MethodHandle 更轻量级。
+   *
+   *
+   * @param proxy
+   * @param method
+   * @param args
+   * @return
+   * @throws Throwable
+   */
   private Object invokeDefaultMethod(Object proxy, Method method, Object[] args)
       throws Throwable {
     final Constructor<MethodHandles.Lookup> constructor = MethodHandles.Lookup.class

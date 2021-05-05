@@ -33,6 +33,21 @@
 - `PooledConnection` 是 Mybatis 中定义一个 InvocationHandler 接口实现（封装真正 Connection 对象以及相关代理对象）
 - `PoolState` 负责管理连接池中所有 PooledConnection 对象的状态，
 
+##### 事务（Transaction）
+- TransactionFactory 是用于创建 Transaction 的工厂接口，`最核心的方法（newTransaction ）`
+
+
+##### binding (Mapper 接口 和 Mapper.xml 之间的映射功能)
+- MapperRegistry 是MyBatis 初始化过程中构造的一个对象，主要作用就是维护 Mapper 接口以及这些 Mapper 的代理工厂
+  - 使用 MyBatis 会先从 `MapperRegistry` 中获取 `xxxMapper` 接口的代理对象，（MapperProxyFactory） 工厂对象。
+- `MapperProxyFactory` （核心功能 创建 Mapper 接口的代理对象）
+- `MapperProxy` 是生成 Mapper 接口代理对象的关键，（实现 InvocationHandler 接口）
+- `MapperMethod` 根据方法签名执行相应的 SQL 语句。
+
+##### 缓存
+- Cache。顶层抽象，定义MyBatis 缓存最核心、最基础的行为。
+- `BlockingCache` 添加阻塞线程的特性
+
 #### 日志 log （采用适配器模式）
 - Log 接口
 - 采用工厂方法，`LogFactory` （负责创建 Log 对象）

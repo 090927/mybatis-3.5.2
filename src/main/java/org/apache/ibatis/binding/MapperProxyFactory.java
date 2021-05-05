@@ -25,7 +25,7 @@ import org.apache.ibatis.session.SqlSession;
 /**
  * @author Lasse Voss
  *
- *  生产 Mapper 代理类的工厂，用Java 动态代理实现。
+ *  生产 Mapper 代理类的工厂（Java 动态代理实现）。
  */
 public class MapperProxyFactory<T> {
 
@@ -50,13 +50,15 @@ public class MapperProxyFactory<T> {
   }
 
   /**
-   * 工厂方法
+   * 工厂方法 （使用 JDK 动态代理）
    * @param sqlSession
    * @return
    */
   public T newInstance(SqlSession sqlSession) {
 
-    // 构建 MapperProxy 对象。
+    /**
+     * 构建 MapperProxy 对象。{@link MapperProxy#MapperProxy(SqlSession, Class, Map)}
+     */
     final MapperProxy<T> mapperProxy = new MapperProxy<>(sqlSession, mapperInterface, methodCache);
     return newInstance(mapperProxy);
   }

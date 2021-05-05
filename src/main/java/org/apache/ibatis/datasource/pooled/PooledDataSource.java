@@ -365,6 +365,12 @@ public class PooledDataSource implements DataSource {
 
   /**
    * 释放连接
+   *  1、从活跃连接集合（即前面提到的 activeConnections 集合）中删除传入的 PooledConnection 对象。
+   *  2、检测该 PooledConnection 对象是否可用。如果连接已不可用，则递增 badConnectionCount 字段进行统计，之后，直接丢弃 PooledConnection 对象即可。如果连接依旧可用，则执行下一步。
+   *  3、检测当前 PooledDataSource 连接池中的空闲连接是否已经达到上限值。如果达到上限值，则 PooledConnection 无法放回到池中，正常关闭其底层的数据库连接即可。如果未达到上限值，则继续执行下一步
+   *  4、将底层连接重新封装成 PooledConnection 对象，并添加到空闲连接集合（也就是前面提到的 idleConnections 集合），然后唤醒所有阻塞等待空闲连接的线程。
+   *
+   *
    * @param conn
    * @throws SQLException
    */
@@ -406,7 +412,6 @@ public class PooledDataSource implements DataSource {
            *  当前 PooledDataSource 连接池中的空闲连接已经达到上限
            *  当前 数据库连接无法放回池中。
            *   累加增加 accumulatedCheckoutTime
-           *
            */
 
           state.accumulatedCheckoutTime += conn.getCheckoutTime();
@@ -439,6 +444,11 @@ public class PooledDataSource implements DataSource {
   /**
    *  获取连接
    *
+   *  1、检测当前连接池中是否有空闲的有效连接，如果有，则直接返回连接；如果没有，则继续执行下一步。
+   *  2、检查连接池当前的活跃连接数是否已经达到上限值，如果未达到，则尝试创建一个新的数据库连接，并在创建成功之后，返回新建的连接；如果已达到最大上限，则往下执行。
+   *  3、检查活跃连接中是否有连接超时，如果有，则将超时的连接从活跃连接集合中移除，并重复步骤 2；如果没有，则执行下一步
+   *  4、当前请求数据库连接的线程阻塞等待，并定期执行前面三步检测相应的分支是否可能获取连接
+   *
    * @param username
    * @param password
    * @return
@@ -452,7 +462,7 @@ public class PooledDataSource implements DataSource {
 
     while (conn == null) {
       synchronized (state) {
-        // 检测空闲连接集合
+        // 1、检测空闲连接集合
         if (!state.idleConnections.isEmpty()) {
           // Pool has available connection
 
@@ -466,7 +476,7 @@ public class PooledDataSource implements DataSource {
 
           // Pool does not have available connection
 
-          // 活跃连接数没有到上限值，则创新连接
+          // 2、活跃连接数没有到上限值，则创新连接
           if (state.activeConnections.size() < poolMaximumActiveConnections) {
             // Can create new connection
 
@@ -477,6 +487,7 @@ public class PooledDataSource implements DataSource {
             }
           } else {
             // Cannot create new connection
+            // 3、检测到超时连接、获取最早的活跃连接
             PooledConnection oldestActiveConnection = state.activeConnections.get(0);
             long longestCheckoutTime = oldestActiveConnection.getCheckoutTime();
 
@@ -493,6 +504,7 @@ public class PooledDataSource implements DataSource {
               // 如果超时连接上有未提交的事务，则自动回滚
               if (!oldestActiveConnection.getRealConnection().getAutoCommit()) {
                 try {
+                  // 事务回滚
                   oldestActiveConnection.getRealConnection().rollback();
                 } catch (SQLException e) {
                   /*
