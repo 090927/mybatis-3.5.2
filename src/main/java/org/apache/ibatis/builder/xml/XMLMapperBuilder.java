@@ -91,6 +91,8 @@ public class XMLMapperBuilder extends BaseBuilder {
 
   /**
    * 【 TODO 核心】XmlMapper 解析。
+   *
+   *   获取 <mapper> 标签中
    */
   public void parse() {
     if (!configuration.isResourceLoaded(resource)) {
@@ -252,6 +254,11 @@ public class XMLMapperBuilder extends BaseBuilder {
     }
   }
 
+  /**
+   *  处理 <cache></cache> 标签
+   *
+   * @param context
+   */
   private void cacheElement(XNode context) {
     if (context != null) {
       String type = context.getStringAttribute("type", "PERPETUAL");

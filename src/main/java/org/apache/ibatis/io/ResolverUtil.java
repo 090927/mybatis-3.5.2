@@ -220,6 +220,10 @@ public class ResolverUtil<T> {
       List<String> children = VFS.getInstance().list(path);
       for (String child : children) {
         if (child.endsWith(".class")) {
+
+          /**
+           * 匹配上，则添加 `matches` 中
+           */
           addIfMatching(test, child);
         }
       }

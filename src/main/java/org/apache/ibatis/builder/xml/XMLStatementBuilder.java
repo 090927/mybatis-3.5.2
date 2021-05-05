@@ -106,6 +106,10 @@ public class XMLStatementBuilder extends BaseBuilder {
     LanguageDriver langDriver = getLanguageDriver(lang);
 
     // Parse selectKey after includes and remove them.
+
+    /**
+     * 解析 “selectKey” {@link #processSelectKeyNodes(String, Class, LanguageDriver)}
+     */
     processSelectKeyNodes(id, parameterTypeClass, langDriver);
 
     // Parse the SQL (pre: <selectKey> and <include> were parsed and removed)
@@ -158,6 +162,12 @@ public class XMLStatementBuilder extends BaseBuilder {
         keyGenerator, keyProperty, keyColumn, databaseId, langDriver, resultSets);
   }
 
+  /**
+   * 处理 <selectKey> 标签
+   * @param id
+   * @param parameterTypeClass
+   * @param langDriver
+   */
   private void processSelectKeyNodes(String id, Class<?> parameterTypeClass, LanguageDriver langDriver) {
     List<XNode> selectKeyNodes = context.evalNodes("selectKey");
     if (configuration.getDatabaseId() != null) {
@@ -196,9 +206,11 @@ public class XMLStatementBuilder extends BaseBuilder {
     String resultMap = null;
     ResultSetType resultSetTypeEnum = null;
 
+    // 通过LanguageDriver解析<selectKey>标签中的SQL语句，得到对应的SqlSource对象
     SqlSource sqlSource = langDriver.createSqlSource(configuration, nodeToHandle, parameterTypeClass);
     SqlCommandType sqlCommandType = SqlCommandType.SELECT;
 
+    // 创建MappedStatement对象
     builderAssistant.addMappedStatement(id, sqlSource, statementType, sqlCommandType,
         fetchSize, timeout, parameterMap, parameterTypeClass, resultMap, resultTypeClass,
         resultSetTypeEnum, flushCache, useCache, resultOrdered,
@@ -206,6 +218,7 @@ public class XMLStatementBuilder extends BaseBuilder {
 
     id = builderAssistant.applyCurrentNamespace(id, false);
 
+    // 创建<selectKey>标签对应的KeyGenerator对象，这个KeyGenerator对象会添加到Configuration.keyGenerators集合中
     MappedStatement keyStatement = configuration.getMappedStatement(id, false);
     configuration.addKeyGenerator(id, new SelectKeyGenerator(keyStatement, executeBefore));
   }

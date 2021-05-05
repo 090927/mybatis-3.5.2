@@ -41,12 +41,24 @@ public class VendorDatabaseIdProvider implements DatabaseIdProvider {
 
   private Properties properties;
 
+  /**
+   * VendorDatabaseIdProvider 首先会从 DataSource 中拿到数据库的名称，
+   *  然后根据 <databaseIdProvider> 标签配置和 DataSource 返回的数据库名称，
+   *   确定最终的 DatabaseId 标识
+   *
+   * @param dataSource
+   * @return
+   */
   @Override
   public String getDatabaseId(DataSource dataSource) {
     if (dataSource == null) {
       throw new NullPointerException("dataSource cannot be null");
     }
     try {
+
+      /**
+       *  获取数据库名称 {@link #getDatabaseName(DataSource)}
+       */
       return getDatabaseName(dataSource);
     } catch (Exception e) {
       LogHolder.log.error("Could not get a databaseId from dataSource", e);
@@ -60,8 +72,12 @@ public class VendorDatabaseIdProvider implements DatabaseIdProvider {
   }
 
   private String getDatabaseName(DataSource dataSource) throws SQLException {
+
+    // 从数据库连接中，获取数据库名称
     String productName = getDatabaseProductName(dataSource);
     if (this.properties != null) {
+
+      // 根据<databaseIdProvider>标签配置，查找自定义数据库名称
       for (Map.Entry<Object, Object> property : properties.entrySet()) {
         if (productName.contains((String) property.getKey())) {
           return (String) property.getValue();

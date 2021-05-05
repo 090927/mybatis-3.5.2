@@ -32,8 +32,14 @@ import org.apache.ibatis.type.TypeHandlerRegistry;
  * @author Clinton Begin
  */
 public abstract class BaseBuilder {
+
+  // MyBatis 初始化过程 围绕 “configuration”
   protected final Configuration configuration;
+
+  // 别名注册中心 （使用标签为很多类定义别名）
   protected final TypeAliasRegistry typeAliasRegistry;
+
+  // TypeHandler 注册中心 （包含：自定义 TypeHandler ）
   protected final TypeHandlerRegistry typeHandlerRegistry;
 
   public BaseBuilder(Configuration configuration) {
@@ -113,6 +119,10 @@ public abstract class BaseBuilder {
       return null;
     }
     try {
+
+      /**
+       * 别名解析 {@link #resolveAlias(String)}
+       */
       return resolveAlias(alias);
     } catch (Exception e) {
       throw new BuilderException("Error resolving class. Cause: " + e, e);
@@ -145,7 +155,17 @@ public abstract class BaseBuilder {
     return handler;
   }
 
+  /**
+   * 解析别名
+   * @param alias
+   * @param <T>
+   * @return
+   */
   protected <T> Class<? extends T> resolveAlias(String alias) {
+
+    /**
+     *  [core] {@link TypeAliasRegistry#resolveAlias(String)}
+     */
     return typeAliasRegistry.resolveAlias(alias);
   }
 }

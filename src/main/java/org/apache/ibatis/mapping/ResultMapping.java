@@ -27,15 +27,25 @@ import org.apache.ibatis.type.TypeHandlerRegistry;
 
 /**
  * @author Clinton Begin
+ *
+ *  维护数据库表中一个列与对应Java 类中一个属性之间的映射关系。
  */
 public class ResultMapping {
 
   private Configuration configuration;
+
+  // 当前标签中指定的 property 属性值，指向的是与 column 列对应的属性名称。
   private String property;
+
+  // 当前标签中指定 column 属性值，指向的是数据库中的一个列名
   private String column;
+
+  // 当前标签指定的 javaType 属性值和 jdbcType 属性值，指定了 property 字段的 Java 类型以及对应列的 JDBC 类型
   private Class<?> javaType;
   private JdbcType jdbcType;
   private TypeHandler<?> typeHandler;
+
+  // 当前标签的 resultMap 属性值，通过该属性我们可以引用另一个 <resultMap> 标签的id，然后由这个被引用的<resultMap> 标签映射结果集中的一部分列。这样，我们就可以将一个查询结果集映射成多个对象，同时确定这些对象之间的关联关系
   private String nestedResultMapId;
   private String nestedQueryId;
   private Set<String> notNullColumns;

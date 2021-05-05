@@ -17,6 +17,8 @@ package org.apache.ibatis.logging;
 
 /**
  * @author Clinton Begin
+ *
+ *  日志模块，采用 “适配器” 模式，兼容三方日志框架。
  */
 public interface Log {
 

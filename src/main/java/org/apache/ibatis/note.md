@@ -1,3 +1,8 @@
+#### mybatis-config.xml 解析
+- 解析入口 `SqlSessionFactoryBuilder#buil()`
+
+
+
 #### Configuration
 - `XMlConfiguration # parse()`,创建 Configuration 对象。
 
@@ -47,11 +52,18 @@
 ##### 缓存
 - Cache。顶层抽象，定义MyBatis 缓存最核心、最基础的行为。
 - `BlockingCache` 添加阻塞线程的特性
+- 每个 `namespace` 开启二级缓存，同时还会将 namespace 与关联的二级缓存 Cache 对象记录到 Configuration.cache 集合中。
+  - 在解析标签 `XMLMapperBuilder#cacheElement`
 
-#### 日志 log （采用适配器模式）
+
+#### 日志 log （采用适配器模式，兼容三方日志框架）
 - Log 接口
 - 采用工厂方法，`LogFactory` （负责创建 Log 对象）
   - 静态代码块，首先会检测 `logConstuctor` 字段是否为空，
       - 如果不为空，则表示已经成功确定当前使用的日志框架，直接返回。
       - 如果为空，则在当前线程中执行传入 `Runnalbe.run()` 尝试确定当前使用的日志框架
   
+
+
+#### 工具类
+- `ResolverUtil` 查询

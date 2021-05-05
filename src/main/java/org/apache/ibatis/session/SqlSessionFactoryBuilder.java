@@ -78,8 +78,8 @@ public class SqlSessionFactoryBuilder {
       XMLConfigBuilder parser = new XMLConfigBuilder(inputStream, environment, properties);
 
       /**
-       * 解析 Configuration {@link XMLConfigBuilder#parse()}
-       * 构建SqlSessionFactory {@link DefaultSqlSessionFactory#DefaultSqlSessionFactory(Configuration)}
+       * 解析 Configuration （ 全局配置对象） {@link XMLConfigBuilder#parse()}
+       * 构建 “SqlSessionFactory” {@link DefaultSqlSessionFactory#DefaultSqlSessionFactory(Configuration)}
        */
       return build(parser.parse());
     } catch (Exception e) {

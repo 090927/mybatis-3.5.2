@@ -21,7 +21,7 @@ import java.lang.reflect.Constructor;
  * @author Clinton Begin
  * @author Eduardo Macarron
  *
- *  负责 Log 对象
+ *  负责 创建 `Log` 对象
  */
 public final class LogFactory {
 

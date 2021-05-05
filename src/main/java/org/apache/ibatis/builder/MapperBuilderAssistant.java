@@ -137,6 +137,12 @@ public class MapperBuilderAssistant extends BaseBuilder {
         .blocking(blocking)
         .properties(props)
         .build();
+
+    /**
+     *  【核心】{@link CacheBuilder#build()}
+     *
+     * 设置全局对象 {@link Configuration#addCache(Cache)}
+     */
     configuration.addCache(cache);
     currentCache = cache;
     return cache;
@@ -173,6 +179,17 @@ public class MapperBuilderAssistant extends BaseBuilder {
         .build();
   }
 
+  /**
+   *  将 ResultMap 对象记录到 Configuration.resultMaps 集合中。
+   *
+   * @param id
+   * @param type
+   * @param extend
+   * @param discriminator
+   * @param resultMappings
+   * @param autoMapping
+   * @return
+   */
   public ResultMap addResultMap(
       String id,
       Class<?> type,
@@ -180,7 +197,11 @@ public class MapperBuilderAssistant extends BaseBuilder {
       Discriminator discriminator,
       List<ResultMapping> resultMappings,
       Boolean autoMapping) {
+
+    // ResultMap的完整id是"namespace.id"的格式
     id = applyCurrentNamespace(id, false);
+
+    // 获取被继承的ResultMap的完整id，也就是父ResultMap对象的完整id
     extend = applyCurrentNamespace(extend, true);
 
     if (extend != null) {

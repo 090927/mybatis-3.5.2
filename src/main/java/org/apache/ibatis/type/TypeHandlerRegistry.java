@@ -533,7 +533,7 @@ public final class TypeHandlerRegistry {
     ResolverUtil<Class<?>> resolverUtil = new ResolverUtil<>();
 
     /**
-     * 查找指定包下的 所有 TypeHandler 类型
+     * 查找指定包下的 所有 TypeHandler 类型 {@link ResolverUtil#find(ResolverUtil.Test, String)}
      */
     resolverUtil.find(new ResolverUtil.IsA(TypeHandler.class), packageName);
     Set<Class<? extends Class<?>>> handlerSet = resolverUtil.getClasses();
