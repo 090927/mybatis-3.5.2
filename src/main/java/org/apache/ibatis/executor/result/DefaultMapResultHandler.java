@@ -26,6 +26,8 @@ import org.apache.ibatis.session.ResultHandler;
 
 /**
  * @author Clinton Begin
+ *
+ *  底层使用 Map<k,V> 存储映射得到的Java 对象。
  */
 public class DefaultMapResultHandler<K, V> implements ResultHandler<V> {
 

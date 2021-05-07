@@ -36,16 +36,26 @@ import org.apache.ibatis.transaction.TransactionFactory;
 
 /**
  * @author Clinton Begin
+ *
+ *  记录延迟加载，涉及的全部信息。包括执行的 SQL语句。SQL 参数
  */
 public class ResultLoader {
 
   protected final Configuration configuration;
+
+  // 执行延迟 SQL 的线程池。
   protected final Executor executor;
   protected final MappedStatement mappedStatement;
+
+  // SQL 参数
   protected final Object parameterObject;
+
+  // 延迟加载的对象类型
   protected final Class<?> targetType;
   protected final ObjectFactory objectFactory;
   protected final CacheKey cacheKey;
+
+  // SQL 语句。
   protected final BoundSql boundSql;
   protected final ResultExtractor resultExtractor;
   protected final long creatorThreadId;
@@ -67,6 +77,8 @@ public class ResultLoader {
   }
 
   public Object loadResult() throws SQLException {
+
+    // 延迟加载的 SQL 语句。
     List<Object> list = selectList();
     resultObject = resultExtractor.extractObjectFromList(list, targetType);
     return resultObject;

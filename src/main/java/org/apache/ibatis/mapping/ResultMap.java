@@ -33,6 +33,8 @@ import org.apache.ibatis.session.Configuration;
 
 /**
  * @author Clinton Begin
+ *
+ *  定义一个静态的映射规则。
  */
 public class ResultMap {
   private Configuration configuration;

@@ -44,6 +44,8 @@ import org.apache.ibatis.type.TypeHandlerRegistry;
 /**
  * @author Clinton Begin
  * @author Kazuki Shimizu
+ *
+ *  获取数据库生成的自增ID。
  */
 public class Jdbc3KeyGenerator implements KeyGenerator {
 
@@ -62,6 +64,14 @@ public class Jdbc3KeyGenerator implements KeyGenerator {
     // do nothing
   }
 
+  /**
+   *  insert 语句执行后，生成的主键保存到用户传的实参中。
+   *
+   * @param executor
+   * @param ms
+   * @param stmt
+   * @param parameter
+   */
   @Override
   public void processAfter(Executor executor, MappedStatement ms, Statement stmt, Object parameter) {
     processBatch(ms, stmt, parameter);
@@ -72,12 +82,18 @@ public class Jdbc3KeyGenerator implements KeyGenerator {
     if (keyProperties == null || keyProperties.length == 0) {
       return;
     }
+
+    // 将数据库生成的自增ID 作为结果集返回
     try (ResultSet rs = stmt.getGeneratedKeys()) {
       final ResultSetMetaData rsmd = rs.getMetaData();
       final Configuration configuration = ms.getConfiguration();
       if (rsmd.getColumnCount() < keyProperties.length) {
         // Error?
       } else {
+
+        /**
+         * 处理 rs 结果集，将生成的ID，设置到对应的属性中 {@link #assignKeys(Configuration, ResultSet, ResultSetMetaData, String[], Object)}
+         */
         assignKeys(configuration, rs, rsmd, keyProperties, parameter);
       }
     } catch (Exception e) {

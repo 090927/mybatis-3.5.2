@@ -37,6 +37,8 @@ import org.apache.ibatis.type.JdbcType;
 
 /**
  * @author Clinton Begin
+ *
+ *  存储过程 “StatementHandler” 实现
  */
 public class CallableStatementHandler extends BaseStatementHandler {
 
@@ -65,9 +67,19 @@ public class CallableStatementHandler extends BaseStatementHandler {
   @Override
   public <E> List<E> query(Statement statement, ResultHandler resultHandler) throws SQLException {
     CallableStatement cs = (CallableStatement) statement;
+
+    // 执行存储过程
     cs.execute();
+
+    /**
+     * 处理结果集  {@link org.apache.ibatis.executor.resultset.DefaultResultSetHandler#handleResultSets(Statement)}
+     */
     List<E> resultList = resultSetHandler.handleResultSets(cs);
+
+    // 处理输出参数，可能修改 resultList 集合。
     resultSetHandler.handleOutputParameters(cs);
+
+    // 返回最后的结果对象
     return resultList;
   }
 

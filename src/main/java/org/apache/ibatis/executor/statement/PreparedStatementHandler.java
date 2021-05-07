@@ -34,6 +34,9 @@ import org.apache.ibatis.session.RowBounds;
 
 /**
  * @author Clinton Begin
+ *
+ *  接收 “PreparedStatement” 对象，并通过该对象来完成 “CRUD” 操作。
+ *   “PreparedStatementHandler” 维护 SQL 语句中包含 “?” 占位符
  */
 public class PreparedStatementHandler extends BaseStatementHandler {
 
@@ -44,11 +47,25 @@ public class PreparedStatementHandler extends BaseStatementHandler {
   @Override
   public int update(Statement statement) throws SQLException {
     PreparedStatement ps = (PreparedStatement) statement;
+
+    // 执行 SQL 语句，修改数据
     ps.execute();
+
+    // 获取影响行数
     int rows = ps.getUpdateCount();
+
+    // 获取实参对象。
     Object parameterObject = boundSql.getParameterObject();
+
+    // 执行 “keyGenerator” 主键key 策略。
     KeyGenerator keyGenerator = mappedStatement.getKeyGenerator();
+
+    /**
+     * 查询主键ID，设置入参实体对象中。
+     */
     keyGenerator.processAfter(executor, mappedStatement, ps, parameterObject);
+
+    // 返回影响行数
     return rows;
   }
 
@@ -97,8 +114,17 @@ public class PreparedStatementHandler extends BaseStatementHandler {
     }
   }
 
+  /**
+   * 解析 SQL 语句中 包含的 “?” 占位符。
+   * @param statement
+   * @throws SQLException
+   */
   @Override
   public void parameterize(Statement statement) throws SQLException {
+
+    /**
+     *   解析 “?” 占位符 {@link org.apache.ibatis.scripting.defaults.DefaultParameterHandler#setParameters(PreparedStatement)}
+     */
     parameterHandler.setParameters((PreparedStatement) statement);
   }
 

@@ -24,6 +24,8 @@ import org.apache.ibatis.session.ResultHandler;
 
 /**
  * @author Clinton Begin
+ *
+ *  底层使用 ArrayList<Object> 存储映射得到 Java 对象
  */
 public class DefaultResultHandler implements ResultHandler<Object> {
 

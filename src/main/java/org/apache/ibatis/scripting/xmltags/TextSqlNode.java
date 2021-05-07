@@ -24,6 +24,8 @@ import org.apache.ibatis.type.SimpleTypeRegistry;
 
 /**
  * @author Clinton Begin
+ *
+ *  实现抽象了，包含 “${}” 占位符的动态SQL 片段。
  */
 public class TextSqlNode implements SqlNode {
   private final String text;
@@ -52,6 +54,8 @@ public class TextSqlNode implements SqlNode {
      * 对象解析 ${} 参数占位符。
      *  {@link BindingTokenParser#BindingTokenParser(DynamicContext, Pattern)} 对象处理参数占位符的内容。
      *  {@link #createParser(TokenHandler)} 创建一个 `GenericTokenParser` 对象。
+     *
+     *    “GenericTokenParser” 识别 “${}”
      */
     GenericTokenParser parser = createParser(new BindingTokenParser(context, injectionFilter));
 

@@ -44,11 +44,11 @@ public class DynamicSqlSource implements SqlSource {
     DynamicContext context = new DynamicContext(configuration, parameterObject);
 
     /**
-     *  对动态SQL 进行解析。
+     *  对动态SQL 进行解析。（组合模式）
      */
     rootSqlNode.apply(context);
 
-    // 创建 sqlSourceBuilder 对象。
+    // 通过SqlSourceBuilder解析"#{}"占位符中的属性，并将SQL语句中的"#{}"占位符替换成"?"占位符
     SqlSourceBuilder sqlSourceParser = new SqlSourceBuilder(configuration);
     Class<?> parameterType = parameterObject == null ? Object.class : parameterObject.getClass();
 

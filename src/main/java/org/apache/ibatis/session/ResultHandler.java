@@ -19,6 +19,10 @@ package org.apache.ibatis.session;
  * @author Clinton Begin
  *
  *  将查询结果转换为 Java 对象。
+ *
+ *
+ *   `DefaultResultContext` 对象，生命周期与 ResultSet 相同，
+ *    每从 ResultSet 映射得到一个 Java 对象都会暂存在 {@link org.apache.ibatis.executor.result.DefaultResultContext
  */
 public interface ResultHandler<T> {
 

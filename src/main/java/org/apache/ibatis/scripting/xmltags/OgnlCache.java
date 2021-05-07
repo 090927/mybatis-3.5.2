@@ -29,11 +29,15 @@ import org.apache.ibatis.builder.BuilderException;
  * @author Eduardo Macarron
  *
  * @see <a href='http://code.google.com/p/mybatis/issues/detail?id=342'>Issue 342</a>
+ *
+ * 添加了一层 OgnlCache 来缓存表达式编译之后的结果
  */
 public final class OgnlCache {
 
   private static final OgnlMemberAccess MEMBER_ACCESS = new OgnlMemberAccess();
   private static final OgnlClassResolver CLASS_RESOLVER = new OgnlClassResolver();
+
+  // 来记录OGNL 表达式编译之后的结果。
   private static final Map<String, Object> expressionCache = new ConcurrentHashMap<>();
 
   private OgnlCache() {
@@ -49,6 +53,12 @@ public final class OgnlCache {
     }
   }
 
+  /**
+   * 解析表达式
+   * @param expression
+   * @return
+   * @throws OgnlException
+   */
   private static Object parseExpression(String expression) throws OgnlException {
     Object node = expressionCache.get(expression);
     if (node == null) {

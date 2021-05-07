@@ -48,6 +48,8 @@ import org.apache.ibatis.type.TypeHandlerRegistry;
  * @author Clinton Begin
  *
  *  用于处理一些通用的逻辑，其中 一级缓存相关的逻辑。
+ *
+ *   实现 Executor 接口，不变的部分是 “事务管理”、“缓存管理”
  */
 public abstract class BaseExecutor implements Executor {
 
@@ -61,7 +63,7 @@ public abstract class BaseExecutor implements Executor {
   // 一级缓存对象。
   protected PerpetualCache localCache;
 
-  // 存储过程输出，参数缓存。
+  // 只用来缓存，存储过程的输出参数。
   protected PerpetualCache localOutputParameterCache;
   protected Configuration configuration;
 
@@ -142,7 +144,9 @@ public abstract class BaseExecutor implements Executor {
   @Override
   public <E> List<E> query(MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler resultHandler) throws SQLException {
 
-    // 获取 BoundSql 对象，BoundSql 为动态 SQL 解析生成的SQL 语句和参数映射信息封装。
+    /**
+     * 获取 BoundSql 对象，BoundSql 为动态 SQL 解析生成的SQL 语句和参数映射信息封装。{@link MappedStatement#getBoundSql(Object)}
+     */
     BoundSql boundSql = ms.getBoundSql(parameter);
 
     /**
@@ -162,10 +166,16 @@ public abstract class BaseExecutor implements Executor {
       throw new ExecutorException("Executor was closed.");
     }
     if (queryStack == 0 && ms.isFlushCacheRequired()) {
+      /*
+       * 非嵌套查询，并且 <select> 标签配置 flushCache 属性为 true，才会清空一级缓存。
+       *  注意: flushCache 配置项会影响 一级缓存中结果对象存活时长。
+       */
+
       clearLocalCache();
     }
     List<E> list;
     try {
+      // 增长查询层次
       queryStack++;
 
       /**
@@ -174,6 +184,11 @@ public abstract class BaseExecutor implements Executor {
        */
       list = resultHandler == null ? (List<E>) localCache.getObject(key) : null;
       if (list != null) {
+        /**
+         *  对存储过程出参的处理：如果命中一级缓存、则获取缓存中保存输出参数
+         *  然后记录到用户传入的 实参对象中。
+         */
+
         handleLocallyCachedOutputParameters(ms, key, parameter, boundSql);
       } else {
 
@@ -183,8 +198,11 @@ public abstract class BaseExecutor implements Executor {
         list = queryFromDatabase(ms, parameter, rowBounds, resultHandler, key, boundSql);
       }
     } finally {
+      // 当前查询完成，查询层数减少
       queryStack--;
     }
+
+    // 完全嵌套查询的填充
     if (queryStack == 0) {
       for (DeferredLoad deferredLoad : deferredLoads) {
         deferredLoad.load();
@@ -193,6 +211,9 @@ public abstract class BaseExecutor implements Executor {
       deferredLoads.clear();
       if (configuration.getLocalCacheScope() == LocalCacheScope.STATEMENT) {
         // issue #482
+        /**
+         * 根据配置决定是否情况 localCache {@link #clearLocalCache()}
+         */
         clearLocalCache();
       }
     }

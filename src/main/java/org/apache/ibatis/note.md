@@ -49,6 +49,20 @@
 - `MapperProxy` 是生成 Mapper 接口代理对象的关键，（实现 InvocationHandler 接口）
 - `MapperMethod` 根据方法签名执行相应的 SQL 语句。
 
+
+##### 动态SQL
+- `SqlNode` 用于描述 mapper Sql 配置的SQL 节点，是MyBatis 实现动态SQL的基石。
+    - 区分标签。
+- `SqlSource`
+  - `DynamicSqlSource` 当 SQL 语句中包含动态 SQL 的时候，会使用 DynamicSqlSource 对象。
+  - `RawSqlSource`：当 SQL 语句中只包含静态 SQL 的时候，会使用 RawSqlSource 对象。
+  - `StaticSqlSource`：DynamicSqlSource 和 RawSqlSource 经过一系列解析之后，会得到最终可提交到数据库的 SQL 语句，这个时候就可以通过 StaticSqlSource 进行封装了。
+  
+
+##### `StatementHandler` （完成SQL 语句执行中最核心）
+
+##### `Executor` 核心接口
+
 ##### 缓存
 - Cache。顶层抽象，定义MyBatis 缓存最核心、最基础的行为。
 - `BlockingCache` 添加阻塞线程的特性
@@ -56,13 +70,20 @@
   - 在解析标签 `XMLMapperBuilder#cacheElement`
 
 
+##### ResultSet
+- `ResultSetHandler` 对结果集的处理。
+- `DefaultMapResultHandler` 底层使用 Map<k,V> 存储映射得到的Java 对象。
+
 #### 日志 log （采用适配器模式，兼容三方日志框架）
 - Log 接口
 - 采用工厂方法，`LogFactory` （负责创建 Log 对象）
   - 静态代码块，首先会检测 `logConstuctor` 字段是否为空，
       - 如果不为空，则表示已经成功确定当前使用的日志框架，直接返回。
       - 如果为空，则在当前线程中执行传入 `Runnalbe.run()` 尝试确定当前使用的日志框架
-  
+ 
+##### 生成主键 `KeyGenerator`
+- Jdbc3KeyGenerator 用于获取数据库生成的自增ID，并记录到用户传入的实参对象的对应属性中。
+- SelectkeyGenerator 查询主键信息，并记录到用户传入的实参对象的对应属性中。
 
 
 #### 工具类

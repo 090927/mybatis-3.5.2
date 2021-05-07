@@ -28,6 +28,8 @@ import org.apache.ibatis.session.Configuration;
 
 /**
  * @author Clinton Begin
+ *
+ *  解析 SQL 产生的中间结果存储。
  */
 public class DynamicContext {
 
@@ -38,16 +40,25 @@ public class DynamicContext {
     OgnlRuntime.setPropertyAccessor(ContextMap.class, new ContextAccessor());
   }
 
+  /**
+   * 用来记录山下文中的一些 KV 信息。{@link ContextMap}
+   */
   private final ContextMap bindings;
+
+  // 用来记录解析之后的SQL 语句。
   private final StringJoiner sqlBuilder = new StringJoiner(" ");
   private int uniqueNumber = 0;
 
   public DynamicContext(Configuration configuration, Object parameterObject) {
     if (parameterObject != null && !(parameterObject instanceof Map)) {
+
+      // 对于非 Map 类型的实参，会创建对应 MetaObject 对象，并封装 “ContextMap”
       MetaObject metaObject = configuration.newMetaObject(parameterObject);
       boolean existsTypeHandler = configuration.getTypeHandlerRegistry().hasTypeHandler(parameterObject.getClass());
       bindings = new ContextMap(metaObject, existsTypeHandler);
     } else {
+
+      // 对 Map 类型的实参，创建一个空的 “ContextMap”
       bindings = new ContextMap(null, false);
     }
     bindings.put(PARAMETER_OBJECT_KEY, parameterObject);
@@ -74,11 +85,22 @@ public class DynamicContext {
     return uniqueNumber++;
   }
 
+  /**
+   *  用来替换，“#{}” 占位的实参
+   */
   static class ContextMap extends HashMap<String, Object> {
     private static final long serialVersionUID = 2977601501966151582L;
     private final MetaObject parameterMetaObject;
     private final boolean fallbackParameterObject;
 
+    /**
+     * 对于 Map 类型，
+     *  parameterMetaObject = null
+     *  fallbackParameterObject = false.
+     *
+     * @param parameterMetaObject
+     * @param fallbackParameterObject
+     */
     public ContextMap(MetaObject parameterMetaObject, boolean fallbackParameterObject) {
       this.parameterMetaObject = parameterMetaObject;
       this.fallbackParameterObject = fallbackParameterObject;
@@ -95,6 +117,9 @@ public class DynamicContext {
         return null;
       }
 
+      /**
+       *  hasGetter {@link MetaObject#hasGetter(String)}
+       */
       if (fallbackParameterObject && !parameterMetaObject.hasGetter(strKey)) {
         return parameterMetaObject.getOriginalObject();
       } else {

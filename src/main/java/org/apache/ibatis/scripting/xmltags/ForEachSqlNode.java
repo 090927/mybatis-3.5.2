@@ -75,6 +75,8 @@ public class ForEachSqlNode implements SqlNode {
         applyIndex(context, mapEntry.getKey(), uniqueNumber);
         applyItem(context, mapEntry.getValue(), uniqueNumber);
       } else {
+
+        // “applyIndex”
         applyIndex(context, i, uniqueNumber);
         applyItem(context, o, uniqueNumber);
       }
@@ -93,7 +95,12 @@ public class ForEachSqlNode implements SqlNode {
 
   private void applyIndex(DynamicContext context, Object o, int i) {
     if (index != null) {
+
+      // Key值与index属性值指定的变量名称绑定
       context.bind(index, o);
+
+      // Key值还会与"__frch_"+index属性值+ "_" + i 这个变量绑定
+      // 这里传入的 i 是一个自增序列，由底层的 DynamicContext 统一维护。
       context.bind(itemizeItem(index, i), o);
     }
   }

@@ -31,6 +31,8 @@ import org.apache.ibatis.session.RowBounds;
 
 /**
  * @author Clinton Begin
+ *
+ *  类似策略模式。
  */
 public class RoutingStatementHandler implements StatementHandler {
 
@@ -38,11 +40,16 @@ public class RoutingStatementHandler implements StatementHandler {
 
   public RoutingStatementHandler(Executor executor, MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler resultHandler, BoundSql boundSql) {
 
+    /*
+     * 下面是根据 MappedStatement 的配置，生成一个相应的 StatementHandler 对象。并设置 “delegate” 字段
+     */
     switch (ms.getStatementType()) {
       case STATEMENT:
+        // 创建 SimpleStatementHandler 对象。
         delegate = new SimpleStatementHandler(executor, ms, parameter, rowBounds, resultHandler, boundSql);
         break;
       case PREPARED:
+        // 创建 PreparedStatementHandler 对象
         delegate = new PreparedStatementHandler(executor, ms, parameter, rowBounds, resultHandler, boundSql);
         break;
       case CALLABLE:

@@ -36,6 +36,8 @@ import org.apache.ibatis.transaction.Transaction;
  * @author Clinton Begin
  * @author Eduardo Macarron
  *
+ *   “Executor” 装饰器。
+ *
  *  当开启 二级缓存，CachingExecutor 对 SimpleExecutor、ReuseExecutor、BatchExecutor 进行装饰操作。
  *    为查询增加缓存功能。
  */
@@ -87,6 +89,7 @@ public class CachingExecutor implements Executor {
 
   @Override
   public <E> List<E> query(MappedStatement ms, Object parameterObject, RowBounds rowBounds, ResultHandler resultHandler) throws SQLException {
+    // 获取BoundSql对象
     BoundSql boundSql = ms.getBoundSql(parameterObject);
 
     /**
@@ -115,10 +118,12 @@ public class CachingExecutor implements Executor {
     if (cache != null) {
 
       /**
-       * 判断是否需要刷新二级缓存 {@link #flushCacheIfRequired(MappedStatement)}
+       * 根据 <select> 标签配置决定是否需要清空二级缓存 {@link #flushCacheIfRequired(MappedStatement)}
        */
       flushCacheIfRequired(ms);
       if (ms.isUseCache() && resultHandler == null) {
+
+        // 是否包含输出参数
         ensureNoOutParams(ms, boundSql);
         @SuppressWarnings("unchecked")
 
@@ -133,7 +138,11 @@ public class CachingExecutor implements Executor {
            */
           list = delegate.query(ms, parameterObject, rowBounds, resultHandler, key, boundSql);
 
-          // 然后将数据，存放到 `MappedStatement` 对应的二级缓存中。
+          /**
+           * 然后将数据，存放到 `MappedStatement` 对应的二级缓存中。{@link TransactionalCacheManager#putObject(Cache, CacheKey, Object)}
+           *
+           * 将查询结果放入TransactionalCache.entriesToAddOnCommit集合中暂存
+           */
           tcm.putObject(cache, key, list); // issue #578 and #116
         }
         return list;

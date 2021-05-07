@@ -41,6 +41,10 @@ public class TransactionalCacheManager {
   }
 
   public void putObject(Cache cache, CacheKey key, Object value) {
+
+    /**
+     * 缓存查询结果 {@link TransactionalCache#putObject(Object, Object)}
+     */
     getTransactionalCache(cache).putObject(key, value);
   }
 

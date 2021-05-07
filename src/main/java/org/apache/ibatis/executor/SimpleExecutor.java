@@ -70,13 +70,13 @@ public class SimpleExecutor extends BaseExecutor {
       StatementHandler handler = configuration.newStatementHandler(wrapper, ms, parameter, rowBounds, resultHandler, boundSql);
 
       /**
-       * 创建 Statement 对象 {@link #prepareStatement(StatementHandler, Log)}
+       * 创建 Statement 对象, 还依赖 “ParameterHandler” 填充 SQL 占位符 {@link #prepareStatement(StatementHandler, Log)}
        */
       stmt = prepareStatement(handler, ms.getStatementLog());
 
       /**
        * 调用 StatementHandler 对象 query
-       *  {@link org.apache.ibatis.executor.statement.SimpleStatementHandler#query(Statement, ResultHandler)}
+       *  并通过 ResultSetHandler 完成结果集的映射 {@link org.apache.ibatis.executor.statement.SimpleStatementHandler#query(Statement, ResultHandler)}
        */
       return handler.query(stmt, resultHandler);
     } finally {
@@ -106,13 +106,13 @@ public class SimpleExecutor extends BaseExecutor {
 
     /**
      * 调用 StatementHandler prepare 创建 Statement 对象。
-     *  {@link org.apache.ibatis.executor.statement.BaseStatementHandler#prepare(Connection, Integer)}
+     *   “创建 Statement 对象” {@link org.apache.ibatis.executor.statement.BaseStatementHandler#prepare(Connection, Integer)}
      */
     stmt = handler.prepare(connection, transaction.getTimeout());
 
     /**
      * 调用 StatementHandler parameterize 设置参数
-     *  {@link org.apache.ibatis.executor.statement.BaseStatementHandler#parameterize(Statement)}
+     *  解析 SQL 语句中 包含的 “?” 占位符。 {@link org.apache.ibatis.executor.statement.BaseStatementHandler#parameterize(Statement)}
       */
     handler.parameterize(stmt);
     return stmt;

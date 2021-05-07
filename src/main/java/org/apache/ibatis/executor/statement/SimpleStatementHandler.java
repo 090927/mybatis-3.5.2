@@ -34,6 +34,8 @@ import org.apache.ibatis.session.RowBounds;
 
 /**
  * @author Clinton Begin
+ *
+ *  通过对象来完成 “CRUD” ，维护SQL 语句中不能包含 “?” 占位符
  */
 public class SimpleStatementHandler extends BaseStatementHandler {
 
@@ -70,16 +72,17 @@ public class SimpleStatementHandler extends BaseStatementHandler {
 
   @Override
   public <E> List<E> query(Statement statement, ResultHandler resultHandler) throws SQLException {
+    // 获取 SQL 语句
     String sql = boundSql.getSql();
 
     /**
-     * 调用 {@link Statement#execute(String)}
+     *  执行SQL 语句 {@link Statement#execute(String)}
      */
     statement.execute(sql);
 
     /**
      * 将结果集转换为 Java 实体对象，并将实体对象放入 `multipleResults`
-     * {@link org.apache.ibatis.executor.resultset.DefaultResultSetHandler#handleResultSets(Statement)}
+     *  映射结果集  {@link org.apache.ibatis.executor.resultset.DefaultResultSetHandler#handleResultSets(Statement)}
      */
     return resultSetHandler.handleResultSets(statement);
   }
@@ -91,6 +94,12 @@ public class SimpleStatementHandler extends BaseStatementHandler {
     return resultSetHandler.handleCursorResultSets(statement);
   }
 
+  /**
+   *  执行 SQL 语句，返回的结果集由 ResultSetHandler 完成映射。
+   * @param connection
+   * @return
+   * @throws SQLException
+   */
   @Override
   protected Statement instantiateStatement(Connection connection) throws SQLException {
     if (mappedStatement.getResultSetType() == ResultSetType.DEFAULT) {

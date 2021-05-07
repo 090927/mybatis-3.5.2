@@ -86,6 +86,8 @@ public class GenericTokenParser {
 
           /**
            * 调用 TokenHandler 的 handleToken 方法替换参数占位符。{@link org.apache.ibatis.builder.SqlSourceBuilder.ParameterMappingTokenHandler#handleToken(String)}
+           *
+           *  "${}" 占位符解析 {@link org.apache.ibatis.scripting.xmltags.TextSqlNode.BindingTokenParser#handleToken(String)}
            */
           builder.append(handler.handleToken(expression.toString()));
           offset = end + closeToken.length();

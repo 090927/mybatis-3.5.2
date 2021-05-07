@@ -29,6 +29,8 @@ import org.apache.ibatis.session.RowBounds;
 /**
  * @author Clinton Begin
  * @author Jeff Butler
+ *
+ *  Oracle 不支持自动生成主键自增ID。
  */
 public class SelectKeyGenerator implements KeyGenerator {
 
@@ -64,13 +66,19 @@ public class SelectKeyGenerator implements KeyGenerator {
         if (keyProperties != null) {
           // Do not close keyExecutor.
           // The transaction will be closed by parent executor.
+
+          // 创建一个新的 Executor 对象来执行指定的 select 语句。
           Executor keyExecutor = configuration.newExecutor(executor.getTransaction(), ExecutorType.SIMPLE);
+
+          // 获取主键信息
           List<Object> values = keyExecutor.query(keyStatement, parameter, RowBounds.DEFAULT, Executor.NO_RESULT_HANDLER);
           if (values.size() == 0) {
             throw new ExecutorException("SelectKey returned no data.");
           } else if (values.size() > 1) {
             throw new ExecutorException("SelectKey returned more than one value.");
           } else {
+
+            // 将主键信息，记录到用户传入的实参对象中。
             MetaObject metaResult = configuration.newMetaObject(values.get(0));
             if (keyProperties.length == 1) {
               if (metaResult.hasGetter(keyProperties[0])) {

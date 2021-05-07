@@ -41,6 +41,8 @@ public class TransactionalCache implements Cache {
 
   private final Cache delegate;
   private boolean clearOnCommit;
+
+  // 用来暂存，当前事务中添加到二级缓存中的数据。这些数据在事务提交时才会真正添加到底层 Cache 对象。
   private final Map<Object, Object> entriesToAddOnCommit;
   private final Set<Object> entriesMissedInCache;
 
@@ -78,6 +80,8 @@ public class TransactionalCache implements Cache {
 
   @Override
   public void putObject(Object key, Object object) {
+
+    // 将数据暂存到entriesToAddOnCommit集合
     entriesToAddOnCommit.put(key, object);
   }
 
@@ -96,11 +100,21 @@ public class TransactionalCache implements Cache {
     if (clearOnCommit) {
       delegate.clear();
     }
+
+    /**
+     *  “flushPendingEntries” {@link #flushPendingEntries()}
+     *   只有在事务提交时，才会将 “entriesToAddOnCommit” 集合中的缓存数据写入 真正的二级缓存中。
+     *   而不是像一级缓存那样，每次查询都会直接写入缓存。这是为了 “防止出现脏读”
+     */
     flushPendingEntries();
     reset();
   }
 
   public void rollback() {
+
+    /**
+     *  清除缓存 {@link #unlockMissedEntries()}
+     */
     unlockMissedEntries();
     reset();
   }
@@ -113,6 +127,8 @@ public class TransactionalCache implements Cache {
 
   private void flushPendingEntries() {
     for (Map.Entry<Object, Object> entry : entriesToAddOnCommit.entrySet()) {
+
+      // 将entriesToAddOnCommit集合中的数据添加到二级缓存
       delegate.putObject(entry.getKey(), entry.getValue());
     }
     for (Object entry : entriesMissedInCache) {
@@ -125,6 +141,8 @@ public class TransactionalCache implements Cache {
   private void unlockMissedEntries() {
     for (Object entry : entriesMissedInCache) {
       try {
+
+        // 对于回滚操作，清除缓存。
         delegate.removeObject(entry);
       } catch (Exception e) {
         log.warn("Unexpected exception while notifiying a rollback to the cache adapter."
