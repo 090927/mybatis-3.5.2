@@ -104,7 +104,7 @@ public class DefaultSqlSessionFactory implements SqlSessionFactory {
       // 创建事务管理器工厂
       final TransactionFactory transactionFactory = getTransactionFactoryFromEnvironment(environment);
 
-      // 创建事务管理器
+      // 创建事务管理器（ 从数据源中创建 Transaction ）
       tx = transactionFactory.newTransaction(environment.getDataSource(), level, autoCommit);
 
       /**
@@ -115,7 +115,7 @@ public class DefaultSqlSessionFactory implements SqlSessionFactory {
       final Executor executor = configuration.newExecutor(tx, execType);
 
       /**
-       * 创建 DefaultSqlSession 实例 {@link DefaultSqlSession#DefaultSqlSession(Configuration, Executor, boolean)}
+       *  在 “Executor” 基础上,创建 DefaultSqlSession 对象 {@link DefaultSqlSession#DefaultSqlSession(Configuration, Executor, boolean)}
        */
       return new DefaultSqlSession(configuration, executor, autoCommit);
     } catch (Exception e) {
@@ -130,16 +130,26 @@ public class DefaultSqlSessionFactory implements SqlSessionFactory {
     try {
       boolean autoCommit;
       try {
+
+        // 获取事务提交方式
         autoCommit = connection.getAutoCommit();
       } catch (SQLException e) {
         // Failover to true, as most poor drivers
         // or databases won't support transactions
         autoCommit = true;
       }
+
+      // 获取Environment对象、TransactionFactory
       final Environment environment = configuration.getEnvironment();
       final TransactionFactory transactionFactory = getTransactionFactoryFromEnvironment(environment);
+
+      // 通过Connection对象创建Transaction
       final Transaction tx = transactionFactory.newTransaction(connection);
+
+      // 创建Executor对象
       final Executor executor = configuration.newExecutor(tx, execType);
+
+      // 创建DefaultSqlSession对象
       return new DefaultSqlSession(configuration, executor, autoCommit);
     } catch (Exception e) {
       throw ExceptionFactory.wrapException("Error opening session.  Cause: " + e, e);

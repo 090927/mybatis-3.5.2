@@ -44,13 +44,19 @@ import org.apache.ibatis.session.SqlSession;
  * Note that this class is not Thread-Safe.
  *
  * @author Clinton Begin
+ *
+ *  “Executor” 使用策略模式。
  */
 public class DefaultSqlSession implements SqlSession {
 
   private final Configuration configuration;
+
+
   private final Executor executor;
 
   private final boolean autoCommit;
+
+  // 标识缓存中，是否有脏数据。执行 update 修改数据时会被设置为 true。
   private boolean dirty;
   private List<Cursor<?>> cursorList;
 
@@ -234,6 +240,10 @@ public class DefaultSqlSession implements SqlSession {
   @Override
   public void commit(boolean force) {
     try {
+
+      /**
+       *  {@link #isCommitOrRollbackRequired(boolean)}
+       */
       executor.commit(isCommitOrRollbackRequired(force));
       dirty = false;
     } catch (Exception e) {
@@ -336,6 +346,13 @@ public class DefaultSqlSession implements SqlSession {
     cursorList.add(cursor);
   }
 
+  /**
+   *  autoCommit 是否自动提交事务
+   *  dirty 缓存中是否有脏数据
+   *
+   * @param force 是否强制提交事务
+   * @return
+   */
   private boolean isCommitOrRollbackRequired(boolean force) {
     return (!autoCommit && dirty) || force;
   }

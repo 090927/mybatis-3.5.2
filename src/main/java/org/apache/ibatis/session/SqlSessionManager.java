@@ -28,13 +28,27 @@ import java.util.Properties;
 import org.apache.ibatis.cursor.Cursor;
 import org.apache.ibatis.executor.BatchResult;
 import org.apache.ibatis.reflection.ExceptionUtil;
+import org.apache.ibatis.session.defaults.DefaultSqlSession;
 
 /**
  * @author Larry Meadors
+ *
+ *   【 SqlSessionFactory 】装饰器
+ *
+ *  具备操作数据库能力和 创建 “sqlSession” 的能力
+ *
+ *  与 {@link org.apache.ibatis.session.defaults.DefaultSqlSessionFactory}
+ *   主要区别，
+ *    1、“DefaultSqlSessionFactory” 一个线程多次获取 SqlSession ，都会创建不同 SqlSession 对象。
+ *    2、SqlSessionManager 有两种模式
+ *      1、跟 “DefaultSqlSessionFactory” 相同
+ *      2、内部维护 ThreadLocal ，记录与当前线程绑定的 SqlSession 对象。
  */
 public class SqlSessionManager implements SqlSessionFactory, SqlSession {
 
   private final SqlSessionFactory sqlSessionFactory;
+
+  // 通过 JDK 动态代理创建的代理类。
   private final SqlSession sqlSessionProxy;
 
   private final ThreadLocal<SqlSession> localSqlSession = new ThreadLocal<>();
@@ -44,7 +58,11 @@ public class SqlSessionManager implements SqlSessionFactory, SqlSession {
     this.sqlSessionProxy = (SqlSession) Proxy.newProxyInstance(
         SqlSessionFactory.class.getClassLoader(),
         new Class[]{SqlSession.class},
-        new SqlSessionInterceptor());
+
+      /**
+       *  动态代理拦截器 {@link SqlSessionInterceptor
+       */
+      new SqlSessionInterceptor());
   }
 
   public static SqlSessionManager newInstance(Reader reader) {
@@ -76,6 +94,7 @@ public class SqlSessionManager implements SqlSessionFactory, SqlSession {
   }
 
   public void startManagedSession() {
+    // 调用底层被装饰的SqlSessionFactory创建SqlSession对象，并绑定到localSqlSession字段中
     this.localSqlSession.set(openSession());
   }
 
@@ -281,10 +300,18 @@ public class SqlSessionManager implements SqlSessionFactory, SqlSession {
 
   @Override
   public void commit() {
+
+    // 获取当前线程绑定的SqlSession对象
     final SqlSession sqlSession = localSqlSession.get();
+
+    // 如果当前未绑定SqlSession对象，则不能用SqlSessionManager来控制事务
     if (sqlSession == null) {
       throw new SqlSessionException("Error:  Cannot commit.  No managed session is started.");
     }
+
+    /**
+     *  提交事务 {@link DefaultSqlSession#commit()}
+     */
     sqlSession.commit();
   }
 
@@ -344,16 +371,24 @@ public class SqlSessionManager implements SqlSessionFactory, SqlSession {
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+
+      // 尝试从localSqlSession变量中获取当前线程绑定的SqlSession对象
       final SqlSession sqlSession = SqlSessionManager.this.localSqlSession.get();
       if (sqlSession != null) {
         try {
+
+          // 当前线程已经绑定了SqlSession，直接使用即可
           return method.invoke(sqlSession, args);
         } catch (Throwable t) {
           throw ExceptionUtil.unwrapThrowable(t);
         }
       } else {
+
+        // 通过openSession()方法创建新SqlSession对象
         try (SqlSession autoSqlSession = openSession()) {
           try {
+
+            // 通过新建的SqlSession对象完成数据库操作
             final Object result = method.invoke(autoSqlSession, args);
             autoSqlSession.commit();
             return result;
