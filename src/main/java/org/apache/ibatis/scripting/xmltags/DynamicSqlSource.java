@@ -60,7 +60,7 @@ public class DynamicSqlSource implements SqlSource {
     SqlSource sqlSource = sqlSourceParser.parse(context.getSql(), parameterType, context.getBindings());
 
     /**
-     * 获得 boundSql 实例 {@link DynamicSqlSource#getBoundSql(Object)}
+     * 获得 boundSql 实例 {@link org.apache.ibatis.builder.StaticSqlSource#getBoundSql(Object)}
      */
     BoundSql boundSql = sqlSource.getBoundSql(parameterObject);
 

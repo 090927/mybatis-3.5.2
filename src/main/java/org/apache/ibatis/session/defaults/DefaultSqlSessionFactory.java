@@ -101,7 +101,9 @@ public class DefaultSqlSessionFactory implements SqlSessionFactory {
       // 获取 MyBatis 主配置文件配置的环境信息
       final Environment environment = configuration.getEnvironment();
 
-      // 创建事务管理器工厂
+      /**
+       * 创建事务管理器工厂
+       */
       final TransactionFactory transactionFactory = getTransactionFactoryFromEnvironment(environment);
 
       // 创建事务管理器（ 从数据源中创建 Transaction ）

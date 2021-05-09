@@ -822,6 +822,10 @@ public class Configuration {
   }
 
   public void addInterceptor(Interceptor interceptor) {
+
+    /**
+     *  添加拦截器列表 {@link InterceptorChain#addInterceptor(Interceptor)}
+     */
     interceptorChain.addInterceptor(interceptor);
   }
 

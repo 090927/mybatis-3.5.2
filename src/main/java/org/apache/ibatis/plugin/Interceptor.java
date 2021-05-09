@@ -19,6 +19,14 @@ import java.util.Properties;
 
 /**
  * @author Clinton Begin
+ *
+ *  拦截器，MyBatis 自定义插件，需实现该接口。
+ *
+ *
+ *   允许拦截的方法
+ *    1、Executor
+ *    2、ResultSetHandler
+ *    3、StatementHandler
  */
 public interface Interceptor {
 
@@ -39,7 +47,7 @@ public interface Interceptor {
     return Plugin.wrap(target, this);
   }
 
-  // 设置插件的属性值。
+  // 在整个MyBatis初始化过程中用来初始化该插件的方法
   default void setProperties(Properties properties) {
     // NOP
   }

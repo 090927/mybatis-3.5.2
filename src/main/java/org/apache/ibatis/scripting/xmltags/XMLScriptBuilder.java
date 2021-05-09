@@ -135,7 +135,7 @@ public class XMLScriptBuilder extends BaseBuilder {
 
           /**
            * 如果 SQL 文本中，不包含 ${} 参数占位符，则不是 动态SQL。
-           * 如果不是，则直接生成静态SQL {@link StaticTextSqlNode#StaticTextSqlNode(String)}
+           * 如果不是，则直接生成静态SQL {@link StaticTextSqlNode#StaticTextSqlNode(String)}  #{} -> ?
            *
            */
           contents.add(new StaticTextSqlNode(data));

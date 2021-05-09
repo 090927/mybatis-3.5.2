@@ -112,6 +112,10 @@ public class TypeAliasRegistry {
       // issue #748
       String key = string.toLowerCase(Locale.ENGLISH);
       Class<T> value;
+
+      /**
+       * 构造方法，默认初始化 {@link #typeAliases}
+       */
       if (typeAliases.containsKey(key)) {
         value = (Class<T>) typeAliases.get(key);
       } else {

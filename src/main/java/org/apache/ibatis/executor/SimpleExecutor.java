@@ -106,13 +106,13 @@ public class SimpleExecutor extends BaseExecutor {
 
     /**
      * 调用 StatementHandler prepare 创建 Statement 对象。
-     *   “创建 Statement 对象” {@link org.apache.ibatis.executor.statement.BaseStatementHandler#prepare(Connection, Integer)}
+     *   “创建 Statement 对象” {@link org.apache.ibatis.executor.statement.PreparedStatementHandler#prepare(Connection, Integer)}
      */
     stmt = handler.prepare(connection, transaction.getTimeout());
 
     /**
      * 调用 StatementHandler parameterize 设置参数
-     *  解析 SQL 语句中 包含的 “?” 占位符。 {@link org.apache.ibatis.executor.statement.BaseStatementHandler#parameterize(Statement)}
+     *  解析 SQL 语句中 包含的 “?” 占位符。 {@link org.apache.ibatis.executor.statement.PreparedStatementHandler#parameterize(Statement)}
       */
     handler.parameterize(stmt);
     return stmt;

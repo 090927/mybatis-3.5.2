@@ -60,7 +60,7 @@ public class TextSqlNode implements SqlNode {
     GenericTokenParser parser = createParser(new BindingTokenParser(context, injectionFilter));
 
     /**
-     * 解析#{} 参数占位符的过程。 {@link GenericTokenParser#parse(String)}
+     * 解析 “#{}” 将其替换为 “?” {@link GenericTokenParser#parse(String)}
      */
     context.appendSql(parser.parse(text));
     return true;
