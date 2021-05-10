@@ -42,6 +42,7 @@ import org.apache.ibatis.session.LocalCacheScope;
 import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.transaction.Transaction;
+import org.apache.ibatis.transaction.managed.ManagedTransaction;
 import org.apache.ibatis.type.TypeHandlerRegistry;
 
 /**
@@ -92,6 +93,8 @@ public abstract class BaseExecutor implements Executor {
   public void close(boolean forceRollback) {
     try {
       try {
+
+        // 【 rollback 】
         rollback(forceRollback);
       } finally {
         if (transaction != null) {
@@ -311,6 +314,10 @@ public abstract class BaseExecutor implements Executor {
   public void rollback(boolean required) throws SQLException {
     if (!closed) {
       try {
+
+        /**
+         *  清理一级缓存
+         */
         clearLocalCache();
         flushStatements(true);
       } finally {
@@ -403,7 +410,17 @@ public abstract class BaseExecutor implements Executor {
     return list;
   }
 
+  /**
+   * 获取 “Connection” 连接。
+   * @param statementLog
+   * @return
+   * @throws SQLException
+   */
   protected Connection getConnection(Log statementLog) throws SQLException {
+
+    /**
+     * 获取数据库连接 “Connection” {@link org.apache.ibatis.transaction.jdbc.JdbcTransaction#getConnection()}
+     */
     Connection connection = transaction.getConnection();
     if (statementLog.isDebugEnabled()) {
       return ConnectionLogger.newInstance(connection, statementLog, queryStack);

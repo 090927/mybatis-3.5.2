@@ -35,6 +35,8 @@ import org.apache.ibatis.logging.LogFactory;
  * This is a simple, synchronous, thread-safe database connection pool.
  *
  * @author Clinton Begin
+ *
+ *  内部有 “UnpooledDataSource” 的引用
  */
 public class PooledDataSource implements DataSource {
 
@@ -84,6 +86,11 @@ public class PooledDataSource implements DataSource {
     expectedConnectionTypeCode = assembleConnectionTypeCode(dataSource.getUrl(), dataSource.getUsername(), dataSource.getPassword());
   }
 
+  /**
+   *   获取 数据库连接 “Connection” 通过 {@link UnpooledDataSource} 来创建，是提供一种，缓存连接池操作。
+   * @return
+   * @throws SQLException
+   */
   @Override
   public Connection getConnection() throws SQLException {
     return popConnection(dataSource.getUsername(), dataSource.getPassword()).getProxyConnection();
@@ -442,10 +449,13 @@ public class PooledDataSource implements DataSource {
   }
 
   /**
-   *  获取连接
+   *  【 获取连接 】 返回 “PooledConnection” 是一个代理对象，但代理对象调用 Connection 的真实方法。
+   *    这样的设计好处
+   *      1、业务查询完毕，将连接，放入池中，是通过 “代理的方式” 实现
    *
-   *  1、检测当前连接池中是否有空闲的有效连接，如果有，则直接返回连接；如果没有，则继续执行下一步。
-   *  2、检查连接池当前的活跃连接数是否已经达到上限值，如果未达到，则尝试创建一个新的数据库连接，并在创建成功之后，返回新建的连接；如果已达到最大上限，则往下执行。
+   *
+   *  1、检测当前连接池中是否有空闲 (idle) 的有效连接，如果有，则直接返回连接；如果没有，则继续执行下一步。
+   *  2、检查连接池（PooledConnection）当前的活跃连接数（activeConnections）是否已经达到上限值，如果未达到，则尝试创建一个新的数据库连接，并在创建成功之后，返回新建的连接；如果已达到最大上限，则往下执行。
    *  3、检查活跃连接中是否有连接超时，如果有，则将超时的连接从活跃连接集合中移除，并重复步骤 2；如果没有，则执行下一步
    *  4、当前请求数据库连接的线程阻塞等待，并定期执行前面三步检测相应的分支是否可能获取连接
    *
@@ -480,7 +490,9 @@ public class PooledDataSource implements DataSource {
           if (state.activeConnections.size() < poolMaximumActiveConnections) {
             // Can create new connection
 
-            // 创建新数据库连接，并封装成 PooledConnection
+            /**
+             * 创建新数据库连接，并封装成 {@link PooledConnection#PooledConnection(Connection, PooledDataSource)}
+             */
             conn = new PooledConnection(dataSource.getConnection(), this);
             if (log.isDebugEnabled()) {
               log.debug("Created connection " + conn.getRealHashCode() + ".");

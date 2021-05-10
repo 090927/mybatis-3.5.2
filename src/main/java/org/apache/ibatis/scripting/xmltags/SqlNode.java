@@ -26,6 +26,8 @@ package org.apache.ibatis.scripting.xmltags;
 public interface SqlNode {
 
   /**
+   *  只处理 “${}” 占位符
+   *
    * 用于解析 SQL 节点，根据参数信息生成静态SQL 内容
    *
    *   apply 方法会根据用户传入的 实参，解析该 sqlNode 所表示的动态SQL 内容并将解析后SQL 片段

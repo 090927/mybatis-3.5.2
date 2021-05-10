@@ -19,6 +19,8 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import javax.sql.DataSource;
 
+import org.apache.ibatis.datasource.pooled.PooledDataSource;
+import org.apache.ibatis.datasource.unpooled.UnpooledDataSource;
 import org.apache.ibatis.logging.Log;
 import org.apache.ibatis.logging.LogFactory;
 import org.apache.ibatis.session.TransactionIsolationLevel;
@@ -34,6 +36,8 @@ import org.apache.ibatis.transaction.TransactionException;
  * @author Clinton Begin
  *
  * @see JdbcTransactionFactory
+ *
+ *   使用 “Connection” 对象来完成事务的提交、回滚等操作。
  */
 public class JdbcTransaction implements Transaction {
 
@@ -57,6 +61,8 @@ public class JdbcTransaction implements Transaction {
   @Override
   public Connection getConnection() throws SQLException {
     if (connection == null) {
+
+      // 【 openConnection 】
       openConnection();
     }
     return connection;
@@ -135,6 +141,12 @@ public class JdbcTransaction implements Transaction {
     if (log.isDebugEnabled()) {
       log.debug("Opening JDBC Connection");
     }
+
+    /**
+     *  获取 “connection” 对象
+     *    1、池化连接 {@link PooledDataSource#getConnection()}
+     *    2、非池化连接  {@link UnpooledDataSource#getConnection()}
+     */
     connection = dataSource.getConnection();
     if (level != null) {
       connection.setTransactionIsolation(level.getLevel());

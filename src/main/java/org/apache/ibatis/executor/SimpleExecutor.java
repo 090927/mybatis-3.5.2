@@ -101,7 +101,9 @@ public class SimpleExecutor extends BaseExecutor {
   private Statement prepareStatement(StatementHandler handler, Log statementLog) throws SQLException {
     Statement stmt;
 
-    // 获取 JDBC Connection 对象。
+    /**
+     * 获取 JDBC Connection 对象。{@link #getConnection(Log)}
+     */
     Connection connection = getConnection(statementLog);
 
     /**

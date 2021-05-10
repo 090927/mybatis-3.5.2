@@ -19,6 +19,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import javax.sql.DataSource;
 
+import org.apache.ibatis.datasource.pooled.PooledDataSource;
 import org.apache.ibatis.logging.Log;
 import org.apache.ibatis.logging.LogFactory;
 import org.apache.ibatis.session.TransactionIsolationLevel;
@@ -33,6 +34,8 @@ import org.apache.ibatis.transaction.Transaction;
  * @author Clinton Begin
  *
  * @see ManagedTransactionFactory
+ *
+ *  由容器来控制事务（JBoos、）的提交、回滚操作。
  */
 public class ManagedTransaction implements Transaction {
 
@@ -57,6 +60,8 @@ public class ManagedTransaction implements Transaction {
   @Override
   public Connection getConnection() throws SQLException {
     if (this.connection == null) {
+
+      // 【 openConnection 】
       openConnection();
     }
     return this.connection;
@@ -86,6 +91,10 @@ public class ManagedTransaction implements Transaction {
     if (log.isDebugEnabled()) {
       log.debug("Opening JDBC Connection");
     }
+
+    /**
+     *  获取 “connection” 连接 {@link PooledDataSource#getConnection()}
+     */
     this.connection = this.dataSource.getConnection();
     if (this.level != null) {
       this.connection.setTransactionIsolation(this.level.getLevel());

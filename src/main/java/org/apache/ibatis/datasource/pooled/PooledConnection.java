@@ -26,7 +26,12 @@ import org.apache.ibatis.reflection.ExceptionUtil;
 /**
  * @author Clinton Begin
  *
- *  封装真正的 Connection 对象以及相关的代理对象
+ *   【 使用代理模式 】
+ *
+ *  封装真正的 Connection 对象以及相关的代理对象。
+ *
+ *    代理对象所有的方法都是调用相应的真正Connection对象的方法实现。当代理对象执行 close() 方法时，要特殊处理，
+ *    不调用真正 “Connection” 对象的 close()方法（invoker 方法），而是将 “Connection” 对象添加到连接池中
  */
 class PooledConnection implements InvocationHandler {
 
@@ -253,6 +258,8 @@ class PooledConnection implements InvocationHandler {
     if (CLOSE.hashCode() == methodName.hashCode() && CLOSE.equals(methodName)) {
 
       /**
+       *
+       *  “释放连接” -》放入数据库连接池中。
        * 如果调用 close() 方法，并没有直接关闭底层链接，而是将其归还给关联的连接池。{@link PooledDataSource#pushConnection(PooledConnection)}
        */
       dataSource.pushConnection(this);

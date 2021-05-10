@@ -103,6 +103,10 @@ public class UnpooledDataSource implements DataSource {
 
   @Override
   public Connection getConnection() throws SQLException {
+
+    /**
+     *  【核心】获取 Connection {@link #doGetConnection(String, String)}
+     */
     return doGetConnection(username, password);
   }
 
@@ -224,6 +228,8 @@ public class UnpooledDataSource implements DataSource {
     if (password != null) {
       props.setProperty("password", password);
     }
+
+    // 【core 】
     return doGetConnection(props);
   }
 
@@ -231,7 +237,7 @@ public class UnpooledDataSource implements DataSource {
     // 初始化 数据库驱动
     initializeDriver();
 
-    // 创建数据库连接
+    // 从 “DriverManager” 中获取连接，获取新的 “Connection” 对象
     Connection connection = DriverManager.getConnection(url, properties);
 
     /**

@@ -217,7 +217,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
       ResultMap resultMap = resultMaps.get(resultSetCount);
 
       /**
-       * 3、处理结果集 {@link #handleResultSet(ResultSetWrapper, ResultMap, List, ResultMapping)}
+       * 3、处理结果集（返回单个结果集） {@link #handleResultSet(ResultSetWrapper, ResultMap, List, ResultMapping)}
        */
       handleResultSet(rsw, resultMap, multipleResults, null);
 
@@ -326,6 +326,15 @@ public class DefaultResultSetHandler implements ResultSetHandler {
     }
   }
 
+  /**
+   *  一个SQL 语句只返回一个结果集
+   *
+   * @param rsw
+   * @param resultMap
+   * @param multipleResults
+   * @param parentMapping
+   * @throws SQLException
+   */
   private void handleResultSet(ResultSetWrapper rsw, ResultMap resultMap, List<Object> multipleResults, ResultMapping parentMapping) throws SQLException {
     try {
 
@@ -351,6 +360,8 @@ public class DefaultResultSetHandler implements ResultSetHandler {
       }
     } finally {
       // issue #228 (close resultsets)
+
+      // 关闭结果集
       closeResultSet(rsw.getResultSet());
     }
   }
@@ -390,7 +401,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
     } else {
 
       /**
-       * 处理无嵌套 ResultMap {@link #handleRowValuesForSimpleResultMap(ResultSetWrapper, ResultMap, ResultHandler, RowBounds, ResultMapping)}
+       * 处理无嵌套 ResultMap（简单映射） {@link #handleRowValuesForSimpleResultMap(ResultSetWrapper, ResultMap, ResultHandler, RowBounds, ResultMapping)}
        */
       handleRowValuesForSimpleResultMap(rsw, resultMap, resultHandler, rowBounds, parentMapping);
     }
@@ -448,6 +459,10 @@ public class DefaultResultSetHandler implements ResultSetHandler {
        *  把一行数据转换为 Java 实体对象 {@link #getRowValue(ResultSetWrapper, ResultMap, String)}
        */
       Object rowValue = getRowValue(rsw, discriminatedResultMap, null);
+
+      /**
+       *  加入 resultHandler.resultList 中。{@link #storeObject(ResultHandler, DefaultResultContext, Object, ResultMapping, ResultSet)}
+       */
       storeObject(resultHandler, resultContext, rowValue, parentMapping, resultSet);
     }
   }
