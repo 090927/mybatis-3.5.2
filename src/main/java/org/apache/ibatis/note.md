@@ -1,7 +1,9 @@
 #### mybatis-config.xml 解析
 - 解析入口 `SqlSessionFactoryBuilder#buil()`
 
-
+#### SQL 执行
+- 入口 `SqlSession # getMapper()` 最终 `调用默认查询`
+- `SqlSession # selectList()` 默认查询实现
 
 #### Configuration
 - `XMlConfiguration # parse()`,创建 Configuration 对象。

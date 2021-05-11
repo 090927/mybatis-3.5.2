@@ -157,6 +157,7 @@ public class DefaultSqlSession implements SqlSession {
 
       /**
        * 以 `MappedStatement` 为参数，调用 {@link org.apache.ibatis.executor.BaseExecutor#query(MappedStatement, Object, RowBounds, ResultHandler)}
+       *  “二级缓存” {@link org.apache.ibatis.executor.CachingExecutor#query(MappedStatement, Object, RowBounds, ResultHandler)}
        */
       return executor.query(ms, wrapCollection(parameter), rowBounds, Executor.NO_RESULT_HANDLER);
     } catch (Exception e) {
@@ -286,7 +287,7 @@ public class DefaultSqlSession implements SqlSession {
     try {
 
       /**
-       *  Executor {@link org.apache.ibatis.executor.BaseExecutor#close(boolean)} 
+       *  Executor {@link org.apache.ibatis.executor.BaseExecutor#close(boolean)}
        */
       executor.close(isCommitOrRollbackRequired(false));
       closeCursors();

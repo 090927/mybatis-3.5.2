@@ -70,7 +70,7 @@ public class SimpleExecutor extends BaseExecutor {
       StatementHandler handler = configuration.newStatementHandler(wrapper, ms, parameter, rowBounds, resultHandler, boundSql);
 
       /**
-       * 创建 Statement 对象, 还依赖 “ParameterHandler” 填充 SQL 占位符 {@link #prepareStatement(StatementHandler, Log)}
+       * 创建 Statement 对象, 还依赖 “ParameterHandler” 对 "?" 占位符进行赋值 {@link #prepareStatement(StatementHandler, Log)}
        */
       stmt = prepareStatement(handler, ms.getStatementLog());
 
@@ -114,7 +114,7 @@ public class SimpleExecutor extends BaseExecutor {
 
     /**
      * 调用 StatementHandler parameterize 设置参数
-     *  解析 SQL 语句中 包含的 “?” 占位符。 {@link org.apache.ibatis.executor.statement.PreparedStatementHandler#parameterize(Statement)}
+     *  解析 SQL 语句中 "?" 占位符，进行赋值 {@link org.apache.ibatis.executor.statement.PreparedStatementHandler#parameterize(Statement)}
       */
     handler.parameterize(stmt);
     return stmt;

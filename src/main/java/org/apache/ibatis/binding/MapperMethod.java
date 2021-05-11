@@ -115,10 +115,22 @@ public class MapperMethod {
           executeWithResultHandler(sqlSession, args);
           result = null;
         } else if (method.returnsMany()) {
+
+          /**
+           *  返回多行，Result {@link #executeForMany(SqlSession, Object[])}
+           */
           result = executeForMany(sqlSession, args);
         } else if (method.returnsMap()) {
+
+          /**
+           * 返回 Map 类型 {@link #executeForMap(SqlSession, Object[])}
+           */
           result = executeForMap(sqlSession, args);
         } else if (method.returnsCursor()) {
+
+          /**
+           * 返回 Cursor 类型 {@link #executeForCursor(SqlSession, Object[])}
+           */
           result = executeForCursor(sqlSession, args);
         } else {
           Object param = method.convertArgsToSqlCommandParam(args);
@@ -183,9 +195,17 @@ public class MapperMethod {
 
   private <E> Object executeForMany(SqlSession sqlSession, Object[] args) {
     List<E> result;
+
+    //param是我们传入的参数，如果传入的是Map，那么这个实际上就是Map对象
     Object param = method.convertArgsToSqlCommandParam(args);
     if (method.hasRowBounds()) {
+
+      //如果有分页
       RowBounds rowBounds = method.extractRowBounds(args);
+
+      /**
+       *  执行SQL的位置 {@link org.apache.ibatis.session.defaults.DefaultSqlSession#selectList(String, Object, RowBounds)}
+       */
       result = sqlSession.selectList(command.getName(), param, rowBounds);
     } else {
       result = sqlSession.selectList(command.getName(), param);

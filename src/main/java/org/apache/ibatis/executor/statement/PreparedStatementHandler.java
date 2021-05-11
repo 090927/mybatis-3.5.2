@@ -115,7 +115,7 @@ public class PreparedStatementHandler extends BaseStatementHandler {
   }
 
   /**
-   * 解析 SQL 语句中 包含的 “?” 占位符。
+   * 解析 SQL 语句中 "?" 占位符进行赋值
    * @param statement
    * @throws SQLException
    */
@@ -123,7 +123,7 @@ public class PreparedStatementHandler extends BaseStatementHandler {
   public void parameterize(Statement statement) throws SQLException {
 
     /**
-     *   解析 “?” 占位符 {@link org.apache.ibatis.scripting.defaults.DefaultParameterHandler#setParameters(PreparedStatement)}
+     *  SQL 语句中 "?" 占位符进行赋值 {@link org.apache.ibatis.scripting.defaults.DefaultParameterHandler#setParameters(PreparedStatement)}
      */
     parameterHandler.setParameters((PreparedStatement) statement);
   }
